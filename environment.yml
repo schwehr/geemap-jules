@@ -16,7 +16,6 @@ dependencies:
     - localtileserver>=0.4.0
     - osmnx
     - pip
-    - pydeck
     - pyntcloud
     - python>=3.11
     - pyvista

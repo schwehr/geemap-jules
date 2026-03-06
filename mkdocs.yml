@@ -111,7 +111,6 @@ nav:
           - core module: core.md
           - coreutils module: coreutils.md
           - datasets module: datasets.md
-          - deck module: deck.md
           - ee_tile_layers module: ee_tile_layers.md
           - examples module: examples.md
           - foliumap module: foliumap.md
