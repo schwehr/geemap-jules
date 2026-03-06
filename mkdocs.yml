@@ -116,7 +116,6 @@ nav:
           - examples module: examples.md
           - foliumap module: foliumap.md
           - geemap module: geemap.md
-          - kepler module: kepler.md
           - legends module: legends.md
           - map_widgets module: map_widgets.md
           - maplibregl module: maplibregl.md
