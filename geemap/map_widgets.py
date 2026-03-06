@@ -25,7 +25,6 @@ import numpy
 import traitlets
 
 from . import common
-from . import conversion
 from . import core
 from . import coreutils
 from . import geemap
@@ -1446,14 +1445,7 @@ class SearchBar(anywidget.AnyWidget):
                 if dataset["name"] == asset_id.replace("/", "_")
             ]
 
-            return conversion.js_snippet_to_py(
-                details[0],
-                add_new_cell=False,
-                import_ee=False,
-                import_geemap=False,
-                show_map=False,
-                Map=self.host_map._var_name,
-            )
+            return None
 
         except Exception as e:
             pass
