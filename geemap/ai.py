@@ -1347,19 +1347,6 @@ class Catalog:
 
         return code_samples_dict
 
-    def _make_python_code_sample(self, js_code: str) -> str:
-        """Converts EE JS code into python.
-
-        Args:
-            js_code: The JavaScript code to convert.
-
-        Returns:
-            The converted Python code.
-        """
-
-        return ""
-
-
 # @title Embeddings classes and helper methods
 
 
