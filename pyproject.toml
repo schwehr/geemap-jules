@@ -62,7 +62,6 @@ ai = [
     "iso8601"
 ]
 backends = [
-    "keplergl",
     "pydeck",
 ]
 dev = [
