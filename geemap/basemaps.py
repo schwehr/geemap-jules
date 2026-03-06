@@ -501,44 +501,6 @@ def xyz_to_folium() -> dict[str, Any]:
 # ******************************************************************************#
 
 
-def xyz_to_pydeck() -> dict[str, Any]:
-    """Convert xyz tile services to pydeck custom tile layers.
-
-    Returns:
-        A dictionary of pydeck tile layers.
-    """
-    import pydeck as pdk
-
-    pydeck_dict = {}
-    # Ignore Esri basemaps if they are already in the custom XYZ_TILES.
-    ignore_list = [XYZ_TILES[tile]["name"] for tile in XYZ_TILES]
-
-    for key, tile in custom_tiles["xyz"].items():
-        url = tile["url"]
-        pydeck_dict[key] = url
-
-    for key, item in get_xyz_dict().items():
-        if item["name"] in ignore_list:
-            continue
-        url = item.build_url()
-        pydeck_dict[key] = url
-
-        if os.environ.get("PLANET_API_KEY") is not None:
-            planet_dict = common.planet_tiles(tile_format="ipyleaflet")
-            for id_, tile in planet_dict.items():
-                pydeck_dict[id_] = tile.url
-
-    pdk.settings.custom_libraries = [
-        {
-            "libraryName": "MyTileLayerLibrary",
-            "resourceUri": "https://cdn.jsdelivr.net/gh/giswqs/pydeck_myTileLayer@master/dist/bundle.js",
-        }
-    ]
-
-    for key in pydeck_dict:
-        pydeck_dict[key] = pdk.Layer("MyTileLayer", pydeck_dict[key], key)
-
-    return pydeck_dict
 
 
 def xyz_to_plotly() -> dict[str, Any]:
