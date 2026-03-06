@@ -25,7 +25,6 @@ import numpy
 import traitlets
 
 from . import common
-from . import conversion
 from . import core
 from . import coreutils
 from . import geemap
@@ -1427,37 +1426,6 @@ class SearchBar(anywidget.AnyWidget):
         dataset_model["additional_html"] = dataset_html
         self.dataset_model = json.dumps(dataset_model)
 
-    def get_ee_example(self, asset_id):
-        try:
-            pkg_dir = str(
-                # pytype: disable=attribute-error
-                importlib.resources.files("geemap")
-                .joinpath("geemap.py")
-                .parent
-                # pytype: enable=attribute-error
-            )
-            with open(os.path.join(pkg_dir, "data/gee_f.json"), encoding="utf-8") as f:
-                functions = json.load(f)
-            details = [
-                dataset["code"]
-                for x in functions["examples"]
-                for dataset in x["contents"]
-                if x["name"] == "Datasets"
-                if dataset["name"] == asset_id.replace("/", "_")
-            ]
-
-            return conversion.js_snippet_to_py(
-                details[0],
-                add_new_cell=False,
-                import_ee=False,
-                import_geemap=False,
-                show_map=False,
-                Map=self.host_map._var_name,
-            )
-
-        except Exception as e:
-            pass
-
     def import_button_clicked(self):
         dataset_model = json.loads(self.dataset_model)
         print(dataset_model)
@@ -1470,27 +1438,25 @@ class SearchBar(anywidget.AnyWidget):
             if not dataset:
                 return
             id_ = dataset["id"]
-            code = self.get_ee_example(id_)
 
-            if not code:
-                dataset_uid = "dataset_" + coreutils.random_string(string_length=3)
-                translate = {
-                    "image_collection": "ImageCollection",
-                    "image": "Image",
-                    "table": "FeatureCollection",
-                    "table_collection": "FeatureCollection",
-                }
-                datatype = translate[dataset["type"]]
-                id_ = dataset["id"]
-                line1 = f"{dataset_uid} = ee.{datatype}('{id_}')"
-                action = {
-                    "image_collection": f"\n{self.host_map._var_name}.addLayer({dataset_uid}, {{}}, '{id_}')",
-                    "image": f"\n{self.host_map._var_name}.addLayer({dataset_uid}, {{}}, '{id_}')",
-                    "table": f"\n{self.host_map._var_name}.addLayer({dataset_uid}, {{}}, '{id_}')",
-                    "table_collection": f"\n{self.host_map._var_name}.addLayer({dataset_uid}, {{}}, '{id_}')",
-                }
-                line2 = action[dataset["type"]]
-                code = [line1, line2]
+            dataset_uid = "dataset_" + coreutils.random_string(string_length=3)
+            translate = {
+                "image_collection": "ImageCollection",
+                "image": "Image",
+                "table": "FeatureCollection",
+                "table_collection": "FeatureCollection",
+            }
+            datatype = translate[dataset["type"]]
+            id_ = dataset["id"]
+            line1 = f"{dataset_uid} = ee.{datatype}('{id_}')"
+            action = {
+                "image_collection": f"\n{self.host_map._var_name}.addLayer({dataset_uid}, {{}}, '{id_}')",
+                "image": f"\n{self.host_map._var_name}.addLayer({dataset_uid}, {{}}, '{id_}')",
+                "table": f"\n{self.host_map._var_name}.addLayer({dataset_uid}, {{}}, '{id_}')",
+                "table_collection": f"\n{self.host_map._var_name}.addLayer({dataset_uid}, {{}}, '{id_}')",
+            }
+            line2 = action[dataset["type"]]
+            code = [line1, line2]
 
             contents = "".join(code).strip()
             # coreutils.create_code_cell(contents)

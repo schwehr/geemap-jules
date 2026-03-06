@@ -1347,29 +1347,6 @@ class Catalog:
 
         return code_samples_dict
 
-    def _make_python_code_sample(self, js_code: str) -> str:
-        """Converts EE JS code into python.
-
-        Args:
-            js_code: The JavaScript code to convert.
-
-        Returns:
-            The converted Python code.
-        """
-
-        # geemap appears to have some stray print statements.
-        _ = io.StringIO()
-        with redirect_stdout(_):
-            code_list = geemap.js_snippet_to_py(
-                js_code,
-                add_new_cell=False,
-                import_ee=False,
-                import_geemap=False,
-                show_map=False,
-            )
-        return "".join(code_list)
-
-
 # @title Embeddings classes and helper methods
 
 

@@ -31,7 +31,6 @@ import requests
 from . import basemaps
 from . import common
 from .common import *
-from .conversion import *
 from . import coreutils
 from . import ee_tile_layers
 from . import osm

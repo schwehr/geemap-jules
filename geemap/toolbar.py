@@ -34,7 +34,6 @@ from . import coreutils
 from . import geemap
 from . import map_widgets
 from . import timelapse
-from .conversion import js_snippet_to_py
 
 
 def js_path() -> pathlib.Path:
@@ -1379,16 +1378,15 @@ def convert_js2py(m):
     full_widget = widgets.VBox(layout=widgets.Layout(width="465px", height="350px"))
     text_widget = widgets.Textarea(
         placeholder=(
-            "Paste your Earth Engine JavaScript into this textbox and click the "
-            "Convert button below to convert the Javascript to Python"
+            "Paste your Earth Engine JavaScript into this textbox."
         ),
         layout=widgets.Layout(width="455px", height="310px"),
     )
 
     buttons = widgets.ToggleButtons(
         value=None,
-        options=["Convert", "Clear", "Close"],
-        tooltips=["Convert", "Clear", "Close"],
+        options=["Clear", "Close"],
+        tooltips=["Clear", "Close"],
         button_style="primary",
     )
     buttons.style.button_width = "128px"
@@ -1399,28 +1397,7 @@ def convert_js2py(m):
         full_widget.close()
 
     def button_clicked(change) -> None:
-        if change["new"] == "Convert":
-
-            if len(text_widget.value) > 0:
-                out_lines = js_snippet_to_py(
-                    text_widget.value,
-                    add_new_cell=False,
-                    import_ee=False,
-                    import_geemap=False,
-                    show_map=False,
-                    Map=m._var_name,
-                )
-                if len(out_lines) > 0 and len(out_lines[0].strip()) == 0:
-                    out_lines = out_lines[1:]
-
-                prefix = (
-                    "# The code has been copied to the clipboard.\n"
-                    "# Press Ctrl+V to in a code cell to paste it.\n"
-                )
-                text_widget.value = "".join([prefix] + out_lines)
-                coreutils.create_code_cell("".join(out_lines))
-
-        elif change["new"] == "Clear":
+        if change["new"] == "Clear":
             text_widget.value = ""
         elif change["new"] == "Close":
             m._convert_ctrl.cleanup()

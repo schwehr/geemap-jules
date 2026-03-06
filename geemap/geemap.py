@@ -39,7 +39,6 @@ from IPython.display import display
 from .basemaps import get_xyz_dict, xyz_to_leaflet
 from . import colormaps
 from .common import *
-from .conversion import *
 from .ee_tile_layers import *
 from . import core
 from . import coreutils
