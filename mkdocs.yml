@@ -1,0 +1,129 @@
+site_name: geemap
+site_description: A Python package for interactive mapping with Google Earth Engine
+site_author: Qiusheng Wu
+site_url: https://geemap.org
+
+repo_url: https://github.com/gee-community/geemap
+
+copyright: "Copyright &copy; 2020 - 2024 Qiusheng Wu"
+
+theme:
+    palette:
+        - scheme: default
+          #   primary: blue
+          #   accent: indigo
+          toggle:
+              icon: material/toggle-switch-off-outline
+              name: Switch to dark mode
+        - scheme: slate
+          primary: indigo
+          accent: indigo
+          toggle:
+              icon: material/toggle-switch
+              name: Switch to light mode
+    name: material
+    icon:
+        repo: fontawesome/brands/github
+    logo: assets/logo.png
+    favicon: assets/favicon.png
+    features:
+        - navigation.instant
+        - navigation.tracking
+        - navigation.top
+        - search.highlight
+        - search.share
+    custom_dir: "docs/overrides"
+    font:
+        text: Google Sans
+        code: Regular
+
+plugins:
+    - search
+    - mkdocstrings
+    - git-revision-date
+    - git-revision-date-localized:
+          enable_creation_date: true
+          type: timeago
+    # - pdf-export
+    - mkdocs-jupyter:
+          include_source: True
+          ignore_h1_titles: True
+          allow_errors: false
+          ignore: ["conf.py"]
+          execute: False
+          execute_ignore:
+              ["notebooks/*.ipynb", "workshops/*.ipynb", "changelog_update.py"]
+
+markdown_extensions:
+    - admonition
+    - abbr
+    - attr_list
+    - def_list
+    - footnotes
+    - meta
+    - md_in_html
+    - pymdownx.superfences
+    - pymdownx.highlight:
+          linenums: true
+    - toc:
+          permalink: true
+
+extra:
+    social:
+        - icon: fontawesome/brands/github
+          link: https://github.com/giswqs
+        - icon: fontawesome/brands/medium
+          link: https://medium.com/@giswqs
+        - icon: fontawesome/brands/twitter
+          link: https://twitter.com/giswqs
+        - icon: fontawesome/brands/linkedin
+          link: https://www.linkedin.com/in/giswqs
+        - icon: fontawesome/brands/youtube
+          link: https://youtube.com/@giswqs
+    analytics:
+        provider: google
+        property: G-H322CB6ZEC
+
+nav:
+    - Home: index.md
+    # - Search: search_bk.md
+    - Book: https://book.geemap.org
+    - Installation: installation.md
+    - Get Started: get-started.md
+    - Usage: usage.md
+    - Cheat Sheet: cheatsheet.md
+    - Tutorials: tutorials.md
+    - Courses: https://courses.geemap.org
+    - Contributing: contributing.md
+    - Citations: citations.md
+    - FAQ: faq.md
+    - Changelog: changelog.md
+    - YouTube Channel: https://youtube.com/@giswqs
+    - Report Issues: https://github.com/gee-community/geemap/issues
+    - API Reference:
+          - ai module: ai.md
+          - basemaps module: basemaps.md
+          - cartoee module: cartoee.md
+          - chart module: chart.md
+          - colormaps module: colormaps.md
+          - common module: common.md
+          - conversion module: conversion.md
+          - core module: core.md
+          - coreutils module: coreutils.md
+          - datasets module: datasets.md
+          - deck module: deck.md
+          - ee_tile_layers module: ee_tile_layers.md
+          - examples module: examples.md
+          - foliumap module: foliumap.md
+          - geemap module: geemap.md
+          - kepler module: kepler.md
+          - legends module: legends.md
+          - map_widgets module: map_widgets.md
+          - maplibregl module: maplibregl.md
+          - ml module: ml.md
+          - osm module: osm.md
+          - plot module: plot.md
+          - plotlymap module: plotlymap.md
+          - report module: report.md
+          - timelapse module: timelapse.md
+          - toolbar module: toolbar.md

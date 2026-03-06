@@ -1,0 +1,207 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "geemap"
+version = "0.37.1.post0"
+description = "A Python package for interactive mapping using Google Earth Engine and ipyleaflet"
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = [
+    "geemap",
+]
+license = {text = "MIT"}
+authors = [
+  {name = "Qiusheng Wu", email = "giswqs@gmail.com"},
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    "anywidget",
+    "bqplot",
+    "earthengine-api>=1.6.12",
+    "eerepr>=0.1.0",
+    "folium>=0.17.0",
+    "geocoder",
+    "ipyevents",
+    "ipyfilechooser>=0.6.0",
+    "ipyleaflet>=0.19.2",
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "plotly",
+    "pyperclip",
+    "pyshp>=2.3.1",
+    "python-box",
+    "requests",
+    "scooby",
+]
+
+[project.scripts]
+geemap = "geemap.cli:main"
+
+[project.optional-dependencies]
+all = [
+    "geemap[ai,backends,dev,extra,lidar,raster,sql,apps,vector,workshop,maplibre]",
+]
+ai = [
+    "google-api-core",
+    "google-cloud-storage",
+    "google-generativeai",
+    "google_cloud_aiplatform",
+    "langchain-community",
+    "langchain_google_genai",
+    "langchain",
+    "iso8601"
+]
+backends = [
+    "keplergl",
+    "pydeck",
+]
+dev = [
+    "watchfiles",
+    "jupyterlab",
+]
+extra = [
+    "ee_extra>=0.0.15",
+    "ffmpeg-python",
+    "gdown",
+    "geeadd>=0.5.1",
+    "geojson",
+    "geopandas",
+    "ipynb-py-convert",
+    "ipytree",
+    "jupyterlab>=3",
+    "mapclassify>=2.4.0",
+    "mss",
+    "oeel",
+    "owslib",
+    "palettable",
+    "pycrs",
+    "sankee>=0.1.0",
+    "whiteboxgui>=0.6.0",
+    "xee",
+]
+lidar = [
+    "ipygany",
+    "ipyvtklink",
+    "laspy[lazrs]",
+    "panel",
+    "pyntcloud[LAS]",
+    "pyvista",
+    "pyvista-xarray",
+    "rioxarray",
+]
+raster = [
+    "geedim",
+    "localtileserver>=0.10.1",
+    "rio-cogeo",
+    "rioxarray",
+    "netcdf4",
+    "pyvista-xarray",
+]
+sql = [
+    "psycopg2",
+    "sqlalchemy",
+]
+tests = [
+    "psutil",
+]
+apps = [
+    "gradio",
+    "streamlit-folium",
+    "voila",
+    "solara",
+]
+vector = [
+    "geopandas",
+    "osmnx",
+]
+workshop = [
+    "geopandas",
+    "geedim",
+    "ffmpeg-python",
+    "gdown",
+]
+maplibre = [
+    "geopandas",
+    "h3",
+    "ipyvuetify",
+    "localtileserver",
+    "mapclassify",
+    "maplibre",
+    "pmtiles",
+    "rioxarray",
+    "xarray",
+]
+
+[tool]
+[tool.hatch.build.targets.sdist]
+packages = ["geemap"]
+exclude = ["docs*"]
+
+[tool.distutils.bdist_wheel]
+universal = true
+
+[tool.bumpversion]
+current_version = "0.37.1.post0"
+commit = true
+tag = true
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "geemap/__init__.py"
+search = '__version__ = "{current_version}"'
+replace = '__version__ = "{new_version}"'
+
+[tool.flake8]
+exclude = [
+    "docs",
+]
+max-line-length = 88
+
+[tool.hatch.envs.default]
+features = ["dev"]
+
+[tool.hatch.build]
+only-packages = true
+artifacts = [
+    "geemap/static/*",
+    "geemap/data/**/*",
+]
+
+[tool.hatch.build.hooks.jupyter-builder]
+build-function = "hatch_jupyter_builder.npm_builder"
+ensured-targets = [
+    "geemap/static/container.js",
+    "geemap/static/inspector.js",
+    "geemap/static/layer_editor.js",
+    "geemap/static/layer_manager_row.js",
+    "geemap/static/layer_manager.js",
+]
+skip-if-exists = [
+    "geemap/static/container.js",
+    "geemap/static/inspector.js",
+    "geemap/static/layer_editor.js",
+    "geemap/static/layer_manager_row.js",
+    "geemap/static/layer_manager.js",
+]
+dependencies = ["hatch-jupyter-builder>=0.5.0"]
+
+[tool.hatch.build.hooks.jupyter-builder.build-kwargs]
+npm = "npm"
+build_cmd = "build"
+
+[project.urls]
+Homepage = "https://github.com/gee-community/geemap"
