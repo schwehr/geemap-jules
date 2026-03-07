@@ -117,7 +117,6 @@ nav:
           - geemap module: geemap.md
           - legends module: legends.md
           - map_widgets module: map_widgets.md
-          - maplibregl module: maplibregl.md
           - ml module: ml.md
           - osm module: osm.md
           - plot module: plot.md
