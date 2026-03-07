@@ -1201,7 +1201,7 @@ class Map(MapWidget):
             html = html.replace(style_before, style_after)
 
             div_before = f"""<div id="pymaplibregl" style="width: 100%; height: {height};"></div>"""
-            div_after = """<div id="pymaplibregl"></div>"""
+            div_after = f"""<div id="pymaplibregl"></div>"""
             html = html.replace(div_before, div_after)
 
             div_before = f"""<div id="pymaplibregl" style="height: {height};"></div>"""
