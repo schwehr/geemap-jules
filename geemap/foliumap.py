@@ -41,7 +41,9 @@ if not coreutils.in_colab_shell():
     from .plot import *
 
 
-basemaps = box.Box(basemaps.xyz_to_folium(), frozen_box=True)
+def _get_basemaps():
+    from .basemaps import xyz_to_folium
+    return box.Box(xyz_to_folium(), frozen_box=True)
 
 
 class Map(folium.Map):
@@ -148,9 +150,9 @@ class Map(folium.Map):
             self.add_to(f)
 
         if kwargs.get("add_google_map"):
-            basemaps["ROADMAP"].add_to(self)
+            _get_basemaps()["ROADMAP"].add_to(self)
         if kwargs.get("basemap"):
-            basemaps[kwargs.get("basemap")].add_to(self)
+            _get_basemaps()[kwargs.get("basemap")].add_to(self)
         if kwargs.get("plugin_LatLngPopup"):
             folium.LatLngPopup().add_to(self)
         if kwargs.get("plugin_Fullscreen"):
@@ -196,11 +198,11 @@ class Map(folium.Map):
         types = types or {}
 
         try:
-            basemaps[mapTypeId].add_to(self)
+            _get_basemaps()[mapTypeId].add_to(self)
         except Exception:
             raise Exception(
                 "Basemap can only be one of the following: {}".format(
-                    ", ".join(basemaps.keys())
+                    ", ".join(_get_basemaps().keys())
                 )
             )
 
@@ -232,7 +234,7 @@ class Map(folium.Map):
 
                     else:
                         basemap = basemap.upper()
-                        basemaps[basemap].add_to(self)
+                        _get_basemaps()[basemap].add_to(self)
 
                 elif isinstance(basemap, xyzservices.TileProvider):
                     name = basemap.name
@@ -257,26 +259,26 @@ class Map(folium.Map):
 
                     arc_add_layer(url, name)
 
-                elif basemap in basemaps:
-                    bmap = basemaps[basemap]
+                elif basemap in _get_basemaps():
+                    bmap = _get_basemaps()[basemap]
                     bmap.show = show
                     bmap.add_to(self)
-                    if isinstance(basemaps[basemap], folium.TileLayer):
-                        url = basemaps[basemap].tiles
-                    elif isinstance(basemaps[basemap], folium.WmsTileLayer):
-                        url = basemaps[basemap].url
+                    if isinstance(_get_basemaps()[basemap], folium.TileLayer):
+                        url = _get_basemaps()[basemap].tiles
+                    elif isinstance(_get_basemaps()[basemap], folium.WmsTileLayer):
+                        url = _get_basemaps()[basemap].url
                     arc_add_layer(url, basemap)
                 else:
                     print(
                         "Basemap can only be one of the following: {}".format(
-                            ", ".join(basemaps.keys())
+                            ", ".join(_get_basemaps().keys())
                         )
                     )
 
         except Exception:
             raise Exception(
                 "Basemap can only be one of the following: {}".format(
-                    ", ".join(basemaps.keys())
+                    ", ".join(_get_basemaps().keys())
                 )
             )
 
@@ -2500,8 +2502,8 @@ class Map(folium.Map):
             else:
                 right_name = "Right Layer"
 
-            if left_layer in basemaps.keys():
-                left_layer = basemaps[left_layer]
+            if left_layer in _get_basemaps().keys():
+                left_layer = _get_basemaps()[left_layer]
             elif isinstance(left_layer, str):
                 if left_layer.startswith(
                     ("http://", "https://")
@@ -2539,11 +2541,11 @@ class Map(folium.Map):
             else:
                 raise ValueError(
                     "left_layer must be one of the following: "
-                    f"{', '.join(basemaps.keys())} or a string url to a tif file."
+                    f"{', '.join(_get_basemaps().keys())} or a string url to a tif file."
                 )
 
-            if right_layer in basemaps.keys():
-                right_layer = basemaps[right_layer]
+            if right_layer in _get_basemaps().keys():
+                right_layer = _get_basemaps()[right_layer]
             elif isinstance(right_layer, str):
                 if right_layer.startswith(
                     ("http://", "https://")
@@ -2580,7 +2582,7 @@ class Map(folium.Map):
             else:
                 raise ValueError(
                     "right_layer must be one of the following: "
-                    f"{', '.join(basemaps.keys())} or a string url to a tif file."
+                    f"{', '.join(_get_basemaps().keys())} or a string url to a tif file."
                 )
 
             control = folium.plugins.SideBySideLayers(
