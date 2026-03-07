@@ -1,6 +1,9 @@
+import multiprocessing
 import unittest
 import os
 import shutil
+import tempfile
+from pathlib import Path
 from unittest import mock
 
 try:
@@ -14,27 +17,17 @@ except ImportError:
 
 from geemap import ml
 import ee
-import multiprocessing
 
 class TestML(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # We don't need FakeEE here if we strictly mock ee objects when testing
-        # Or we can patch ee.Geometry.Point, ee.Feature, ee.FeatureCollection
+        # We don't need FakeEE here if we strictly mock ee objects when testing.
+        # Or we can patch ee.Geometry.Point, ee.Feature, ee.FeatureCollection.
         pass
-
-    def setUp(self):
-        self.temp_dir = "tests/temp_ml_data"
-        if not os.path.exists(self.temp_dir):
-            os.makedirs(self.temp_dir)
-
-    def tearDown(self):
-        if os.path.exists(self.temp_dir):
-            shutil.rmtree(self.temp_dir)
 
     @unittest.skipIf(not HAS_SKLEARN, "sklearn not installed")
     def test_tree_to_string_classification(self):
-        # Create a simple decision tree classifier
+        # Create a simple decision tree classifier.
         X = np.array([[0, 0], [1, 1], [0, 1], [1, 0]])
         y = np.array([0, 1, 1, 0])
         clf = sklearn.tree.DecisionTreeClassifier(max_depth=2, random_state=42)
@@ -46,7 +39,7 @@ class TestML(unittest.TestCase):
 
     @unittest.skipIf(not HAS_SKLEARN, "sklearn not installed")
     def test_tree_to_string_regression(self):
-        # Create a simple decision tree regressor
+        # Create a simple decision tree regressor.
         X = np.array([[0, 0], [1, 1], [0, 1], [1, 0]])
         y = np.array([0.1, 0.9, 0.8, 0.2])
         reg = sklearn.tree.DecisionTreeRegressor(max_depth=2, random_state=42)
@@ -59,9 +52,9 @@ class TestML(unittest.TestCase):
     @unittest.skipIf(not HAS_SKLEARN, "sklearn not installed")
     @mock.patch.object(multiprocessing, 'Pool')
     def test_rf_to_strings(self, mock_pool):
-        # We need to mock multiprocessing because we don't want to actually spin up processes
+        # We need to mock multiprocessing because we don't want to actually spin up processes.
         mock_pool_instance = mock_pool.return_value.__enter__.return_value
-        # Mock map_async to return a mock result
+        # Mock map_async to return a mock result.
         mock_async_result = mock.MagicMock()
         mock_async_result.get.return_value = ["tree1_str", "tree2_str"]
         mock_pool_instance.map_async.return_value = mock_async_result
@@ -71,9 +64,9 @@ class TestML(unittest.TestCase):
         rf = sklearn.ensemble.RandomForestClassifier(n_estimators=2, max_depth=2, random_state=42)
         rf.fit(X, y)
 
-        # Mock classes_ to avoid issues if output_mode INFER logic needs it
+        # Mock classes_ to avoid issues if output_mode INFER logic needs it.
         rf.classes_ = np.array([0, 1])
-        # Set criterion to gini so INFER mode knows it's a classifier
+        # Set criterion to gini so INFER mode knows it's a classifier.
         rf.criterion = 'gini'
 
         trees = ml.rf_to_strings(rf, feature_names=["f1", "f2"], processes=1, output_mode="CLASSIFICATION")
@@ -97,10 +90,10 @@ class TestML(unittest.TestCase):
     def test_fc_to_classifier(self, mock_ensemble):
         mock_ensemble.return_value = "mocked_classifier"
 
-        # Mock ee.FeatureCollection and its aggregate_array method
+        # Mock ee.FeatureCollection and its aggregate_array method.
         mock_fc = mock.MagicMock()
         mock_aggregate = mock.MagicMock()
-        # The map function should return a list-like of ee.Strings, we'll just return a list
+        # The map function should return a list-like of ee.Strings, we'll just return a list.
         mock_aggregate.map.return_value = ["tree1\n", "tree2\n"]
         mock_fc.aggregate_array.return_value = mock_aggregate
 
@@ -132,14 +125,14 @@ class TestML(unittest.TestCase):
 
     def test_trees_to_csv(self):
         trees = ["tree1\n", "tree2\n"]
-        out_csv = os.path.join(self.temp_dir, "test_trees.csv")
-        ml.trees_to_csv(trees, out_csv)
-        self.assertTrue(os.path.exists(out_csv))
+        with tempfile.TemporaryDirectory() as temp_dir:
+            out_csv = Path(temp_dir) / "test_trees.csv"
+            ml.trees_to_csv(trees, str(out_csv))
+            self.assertTrue(out_csv.exists())
 
-        with open(out_csv, "r") as f:
-            content = f.read()
-        self.assertIn("tree1#", content)
-        self.assertIn("tree2#", content)
+            content = out_csv.read_text(encoding="utf-8")
+            self.assertIn("tree1#", content)
+            self.assertIn("tree2#", content)
 
     @mock.patch.object(ml, 'fc_to_classifier')
     @mock.patch.object(ee, 'FeatureCollection')
@@ -149,13 +142,13 @@ class TestML(unittest.TestCase):
         mock_fc_to_classifier.return_value = "mocked_classifier"
 
         trees = ["tree1", "tree2"]
-        out_csv = os.path.join(self.temp_dir, "test_trees.csv")
-        with open(out_csv, "w") as f:
-            f.write("\n".join(trees))
+        with tempfile.TemporaryDirectory() as temp_dir:
+            out_csv = Path(temp_dir) / "test_trees.csv"
+            out_csv.write_text("\n".join(trees), encoding="utf-8")
 
-        classifier = ml.csv_to_classifier(out_csv)
-        self.assertEqual(classifier, "mocked_classifier")
-        mock_fc_to_classifier.assert_called_once()
+            classifier = ml.csv_to_classifier(str(out_csv))
+            self.assertEqual(classifier, "mocked_classifier")
+            mock_fc_to_classifier.assert_called_once()
 
     def test_csv_to_classifier_file_not_found(self):
         classifier = ml.csv_to_classifier("non_existent_file.csv")
