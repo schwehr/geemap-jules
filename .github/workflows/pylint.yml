@@ -13,6 +13,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
+                # Only run pylint in one version of python to save resources.
                 python-version: [
                     "3.13"
                 ]
