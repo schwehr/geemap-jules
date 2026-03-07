@@ -12,7 +12,10 @@ jobs:
         runs-on: windows-latest
         strategy:
             matrix:
-                python-version: ["3.13", "3.14"]
+                python-version: [
+                    "3.13",
+                    "3.14"
+                ]
 
         env:
             USE_FOLIUM: ${{ secrets.USE_FOLIUM }}

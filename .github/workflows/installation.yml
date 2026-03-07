@@ -13,7 +13,8 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                python-version: ["3.13", "3.14"]
+                # Only test one version of python in this workflow to save resources.
+                python-version: ["3.13"]
         steps:
             - uses: actions/checkout@v6
 
