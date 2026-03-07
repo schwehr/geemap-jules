@@ -69,5 +69,66 @@ class ColormapsTest(unittest.TestCase):
         self.assertEqual(palette[255], "f0f921")
 
 
+    def test_get_colorbar(self):
+        """Test get_colorbar."""
+        from unittest.mock import patch
+        import matplotlib.pyplot as plt
+
+        colors = ["#ff0000", "#00ff00", "#0000ff"]
+
+        # return_fig=True
+        fig = colormaps.get_colorbar(colors, return_fig=True)
+        self.assertIsNotNone(fig)
+
+        # discrete=True, return_fig=True
+        fig_discrete = colormaps.get_colorbar(colors, discrete=True, return_fig=True)
+        self.assertIsNotNone(fig_discrete)
+
+        # return_fig=False
+        with patch.object(plt, "show") as mock_show:
+            colormaps.get_colorbar(colors, return_fig=False)
+            mock_show.assert_called_once()
+
+    def test_list_colormaps(self):
+        """Test list_colormaps."""
+        cmaps = colormaps.list_colormaps()
+        self.assertIn("viridis", cmaps)
+
+        cmaps_extra = colormaps.list_colormaps(add_extra=True)
+        self.assertIn("dem", cmaps_extra)
+        self.assertIn("ndvi", cmaps_extra)
+
+        cmaps_lower = colormaps.list_colormaps(lowercase=True)
+        self.assertIn("viridis", cmaps_lower)
+
+    def test_plot_colormap(self):
+        """Test plot_colormap."""
+        from unittest.mock import patch
+        import matplotlib.pyplot as plt
+
+        # return_fig=True, axis_off=True, show_name=True
+        fig = colormaps.plot_colormap("viridis", axis_off=True, show_name=True, return_fig=True)
+        self.assertIsNotNone(fig)
+
+        # return_fig=True, axis_off=False, show_name=False
+        fig = colormaps.plot_colormap("viridis", axis_off=False, show_name=False, return_fig=True)
+        self.assertIsNotNone(fig)
+
+        # return_fig=False
+        with patch.object(plt, "show") as mock_show:
+            colormaps.plot_colormap("viridis", return_fig=False)
+            mock_show.assert_called_once()
+
+    def test_plot_colormaps(self):
+        """Test plot_colormaps."""
+        from unittest.mock import patch
+        import matplotlib.pyplot as plt
+
+        with patch.object(colormaps, "list_colormaps") as mock_list, patch.object(plt, "show") as mock_show:
+            mock_list.return_value = ["viridis", "plasma"]
+            colormaps.plot_colormaps()
+            mock_show.assert_called_once()
+
+
 if __name__ == "__main__":
     unittest.main()
