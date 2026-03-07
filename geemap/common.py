@@ -10341,7 +10341,7 @@ def get_local_tile_layer(
 
     if is_studio_lab():
         os.environ["LOCALTILESERVER_CLIENT_PREFIX"] = (
-            f"studiolab/default/jupyter/proxy/{{port}}"
+            "studiolab/default/jupyter/proxy/{port}"
         )
     elif is_on_aws():
         os.environ["LOCALTILESERVER_CLIENT_PREFIX"] = "proxy/{port}"
