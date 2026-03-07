@@ -3,10 +3,10 @@ name: "TestingWindows"
 on:
     push:
         branches:
-            - master
+            - main
     pull_request:
         branches:
-            - master
+            - main
 jobs:
     test-windows:
         runs-on: windows-latest
