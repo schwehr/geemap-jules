@@ -72,6 +72,7 @@ class ColormapsTest(unittest.TestCase):
     def test_get_colorbar(self):
         """Test get_colorbar."""
         from unittest.mock import patch
+        import matplotlib.pyplot as plt
 
         colors = ["#ff0000", "#00ff00", "#0000ff"]
 
@@ -84,7 +85,7 @@ class ColormapsTest(unittest.TestCase):
         self.assertIsNotNone(fig_discrete)
 
         # return_fig=False
-        with patch("matplotlib.pyplot.show") as mock_show:
+        with patch.object(plt, "show") as mock_show:
             colormaps.get_colorbar(colors, return_fig=False)
             mock_show.assert_called_once()
 
@@ -103,6 +104,7 @@ class ColormapsTest(unittest.TestCase):
     def test_plot_colormap(self):
         """Test plot_colormap."""
         from unittest.mock import patch
+        import matplotlib.pyplot as plt
 
         # return_fig=True, axis_off=True, show_name=True
         fig = colormaps.plot_colormap("viridis", axis_off=True, show_name=True, return_fig=True)
@@ -113,15 +115,16 @@ class ColormapsTest(unittest.TestCase):
         self.assertIsNotNone(fig)
 
         # return_fig=False
-        with patch("matplotlib.pyplot.show") as mock_show:
+        with patch.object(plt, "show") as mock_show:
             colormaps.plot_colormap("viridis", return_fig=False)
             mock_show.assert_called_once()
 
     def test_plot_colormaps(self):
         """Test plot_colormaps."""
         from unittest.mock import patch
+        import matplotlib.pyplot as plt
 
-        with patch("geemap.colormaps.list_colormaps") as mock_list, patch("matplotlib.pyplot.show") as mock_show:
+        with patch.object(colormaps, "list_colormaps") as mock_list, patch.object(plt, "show") as mock_show:
             mock_list.return_value = ["viridis", "plasma"]
             colormaps.plot_colormaps()
             mock_show.assert_called_once()
