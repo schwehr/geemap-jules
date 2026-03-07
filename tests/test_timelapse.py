@@ -1,6 +1,10 @@
 """Tests for the timelapse module."""
 import unittest
 from unittest import mock
+import sys
+
+# To allow mock testing when ffmpeg-python is not installed
+sys.modules['ffmpeg'] = mock.MagicMock()
 
 from geemap import timelapse
 
@@ -31,16 +35,19 @@ class TestTimelapse(unittest.TestCase):
         mock_system.assert_called_once()
         self.assertIn("gifsicle", mock_system.call_args[0][0])
 
-    @mock.patch("ffmpeg.input")
-    @mock.patch("ffmpeg.output")
-    @mock.patch("ffmpeg.run")
     @mock.patch("geemap.timelapse.os.path.exists")
     @mock.patch("geemap.timelapse.shutil.which")
-    def test_reduce_gif_size(self, mock_which, mock_exists, mock_ffmpeg_run, mock_ffmpeg_output, mock_ffmpeg_input):
+    def test_reduce_gif_size(self, mock_which, mock_exists):
         mock_exists.return_value = True
         mock_which.return_value = True
-        timelapse.reduce_gif_size("in.gif", "out.gif")
-        mock_ffmpeg_run.assert_called_once()
+
+        # the ffmpeg inside geemap.timelapse is locally imported and used inside the function
+        with mock.patch("ffmpeg.input") as mock_input, \
+             mock.patch("ffmpeg.output") as mock_output, \
+             mock.patch("ffmpeg.run") as mock_run:
+
+            timelapse.reduce_gif_size("in.gif", "out.gif")
+            mock_run.assert_called_once()
 
 if __name__ == '__main__':
     unittest.main()
