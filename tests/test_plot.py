@@ -1,9 +1,11 @@
 import unittest
-from unittest.mock import patch
+from unittest import mock
 import pandas as pd
 import plotly.graph_objs as go
 
 from geemap import plot
+from geemap import coreutils
+from geemap import common
 
 
 class TestPlot(unittest.TestCase):
@@ -45,9 +47,9 @@ class TestPlot(unittest.TestCase):
         with self.assertRaises(ValueError):
             plot.bar_chart(data=123)
 
-    @patch("geemap.coreutils.github_raw_url")
-    @patch("geemap.common.get_direct_url")
-    @patch("pandas.read_csv")
+    @mock.patch.object(coreutils, "github_raw_url")
+    @mock.patch.object(common, "get_direct_url")
+    @mock.patch.object(pd, "read_csv")
     def test_bar_chart_url(self, mock_read_csv, mock_get_direct_url, mock_github_raw_url):
         mock_github_raw_url.return_value = "https://example.com/data.csv"
         mock_get_direct_url.return_value = "https://example.com/data.csv"
@@ -83,7 +85,7 @@ class TestPlot(unittest.TestCase):
         with self.assertRaises(ValueError):
             plot.line_chart(data=None)
 
-    @patch("pandas.read_csv")
+    @mock.patch.object(pd, "read_csv")
     def test_line_chart_local_csv(self, mock_read_csv):
         mock_read_csv.return_value = self.df.copy()
         fig = plot.line_chart(
