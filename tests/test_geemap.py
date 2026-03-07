@@ -2,7 +2,7 @@
 """Tests for `geemap` package."""
 
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest import mock
 
 import ee
 import ipyleaflet
@@ -11,12 +11,13 @@ import geemap
 class TestGeemap(unittest.TestCase):
     """Tests for `geemap` package."""
 
-    @patch('geemap.coreutils.ee_initialize')
-    @patch('ee.Reducer.mean')
+    @mock.patch.object(geemap.coreutils, 'ee_initialize')
+    @mock.patch.object(ee.Reducer, 'mean')
     def test_map_init(self, mock_mean, mock_init):
         m = geemap.Map(ee_initialize=True)
         self.assertIsInstance(m, ipyleaflet.Map)
         mock_init.assert_called_once()
+        # ee.Reducer.mean is called during initialization to set the default roi_reducer
         mock_mean.assert_called_once()
 
     def test_map_properties(self):
@@ -35,11 +36,11 @@ class TestGeemap(unittest.TestCase):
 
     def test_layer_dict_properties(self):
         m = geemap.Map(ee_initialize=False)
-        m.ee_layers = {"test_layer": {"ee_object": MagicMock(spec=ee.Image), "ee_layer": MagicMock()}}
+        m.ee_layers = {"test_layer": {"ee_object": mock.MagicMock(spec=ee.Image), "ee_layer": mock.MagicMock()}}
         self.assertIn("test_layer", m.ee_raster_layers)
         self.assertNotIn("test_layer", m.ee_vector_layers)
 
-        m.ee_layers = {"test_vector": {"ee_object": MagicMock(spec=ee.Feature), "ee_layer": MagicMock()}}
+        m.ee_layers = {"test_vector": {"ee_object": mock.MagicMock(spec=ee.Feature), "ee_layer": mock.MagicMock()}}
         self.assertIn("test_vector", m.ee_vector_layers)
         self.assertNotIn("test_vector", m.ee_raster_layers)
 
@@ -51,13 +52,14 @@ class TestGeemap(unittest.TestCase):
 
     def test_add(self):
         m = geemap.Map(ee_initialize=False)
-        # Assuming search_control was added via config to map controls when we add it explicitly or we test adding a built-in control string.
+        # Assuming search_control was added via config to map controls when
+        # we add it explicitly or we test adding a built-in control string.
         m.add("layer_ctrl")
         self.assertTrue(any(isinstance(c, ipyleaflet.LayersControl) for c in m.controls))
 
     def test_zoom_to_bounds(self):
         m = geemap.Map(ee_initialize=False)
-        m.fit_bounds = MagicMock()
+        m.fit_bounds = mock.MagicMock()
         m.zoom_to_bounds([1, 2, 3, 4])
         m.fit_bounds.assert_called_once_with([[2, 1], [4, 3]])
 
