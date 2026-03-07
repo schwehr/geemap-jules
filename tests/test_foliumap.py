@@ -1,4 +1,5 @@
 import unittest
+from unittest import mock
 import os
 
 os.environ["USE_FOLIUM"] = "1"

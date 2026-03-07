@@ -41,7 +41,8 @@ if not coreutils.in_colab_shell():
     from .plot import *
 
 
-basemaps = box.Box(basemaps.xyz_to_folium(), frozen_box=True)
+from .basemaps import xyz_to_folium
+basemaps = box.Box(xyz_to_folium(), frozen_box=True)
 
 
 class Map(folium.Map):
