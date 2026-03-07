@@ -241,7 +241,7 @@ def plot_colormaps(width: float = 8.0, height: float = 0.4) -> None:
     plt.show()
 
 
-def get_palettes() -> Any:
+def get_palettes() -> box.Box:
     """Returns a dictionary of colormaps and their associated palettes."""
     for index, cmap_name in enumerate(list_colormaps()):
         if index < len(list_colormaps()):
