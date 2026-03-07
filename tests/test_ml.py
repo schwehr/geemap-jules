@@ -19,12 +19,6 @@ from geemap import ml
 import ee
 
 class TestML(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        # We don't need FakeEE here if we strictly mock ee objects when testing.
-        # Or we can patch ee.Geometry.Point, ee.Feature, ee.FeatureCollection.
-        pass
-
     @unittest.skipIf(not HAS_SKLEARN, "sklearn not installed")
     def test_tree_to_string_classification(self):
         # Create a simple decision tree classifier.
