@@ -156,9 +156,12 @@ class TestTimelapse(unittest.TestCase):
     def test_add_text_to_gif(self, mock_bytesio, mock_draw, mock_iterator, mock_open, mock_font, mock_makedirs, mock_exists):
         # We need exists to return True for in_gif, True for font, False for out_dir
         def exists_side_effect(path):
-            if path == os.path.abspath("in.gif"): return True
-            if "arial.ttf" in path: return True
-            if path == os.path.dirname(os.path.abspath("out.gif")): return False
+            if path == os.path.abspath("in.gif"):
+                return True
+            if "arial.ttf" in path:
+                return True
+            if path == os.path.dirname(os.path.abspath("out.gif")):
+                return False
             return True
         mock_exists.side_effect = exists_side_effect
 
