@@ -20,6 +20,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
     "anywidget",
@@ -40,6 +41,7 @@ dependencies = [
     "python-box",
     "requests",
     "scooby",
+    "xarray",
 ]
 
 [project.scripts]
@@ -135,7 +137,6 @@ maplibre = [
     "maplibre",
     "pmtiles",
     "rioxarray",
-    "xarray",
 ]
 
 [tool]
