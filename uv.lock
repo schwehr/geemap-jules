@@ -1351,6 +1351,7 @@ dependencies = [
     { name = "python-box" },
     { name = "requests" },
     { name = "scooby" },
+    { name = "xarray" },
 ]
 
 [package.optional-dependencies]
@@ -1416,7 +1417,6 @@ all = [
     { name = "voila" },
     { name = "watchfiles" },
     { name = "whiteboxgui" },
-    { name = "xarray" },
     { name = "xee" },
 ]
 apps = [
@@ -1468,7 +1468,6 @@ maplibre = [
     { name = "maplibre" },
     { name = "pmtiles" },
     { name = "rioxarray" },
-    { name = "xarray" },
 ]
 raster = [
     { name = "geedim" },
@@ -1579,7 +1578,7 @@ requires-dist = [
     { name = "voila", marker = "extra == 'apps'" },
     { name = "watchfiles", marker = "extra == 'dev'" },
     { name = "whiteboxgui", marker = "extra == 'extra'", specifier = ">=0.6.0" },
-    { name = "xarray", marker = "extra == 'maplibre'" },
+    { name = "xarray" },
     { name = "xee", marker = "extra == 'extra'" },
 ]
 provides-extras = ["all", "ai", "backends", "dev", "extra", "lidar", "raster", "sql", "tests", "apps", "vector", "workshop", "maplibre"]

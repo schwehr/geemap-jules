@@ -53,6 +53,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import requests
+import xarray as xr
 
 from . import colormaps
 from . import coreutils
@@ -2784,7 +2785,6 @@ def netcdf_to_ee(nc_file, var_names, band_names=None, lon="lon", lat="lat", deci
     Returns:
         image: An ee.Image
     """
-    import xarray as xr
 
     def most_common_value(lst):
         counter = collections.Counter(lst)
@@ -3040,9 +3040,8 @@ def ee_to_xarray(
             Used when ee_initialize is True to initialize or reinitialize Earth Engine.
 
     Returns:
-      An xarray.Dataset that streams in remote data from Earth Engine.
+      An xr.Dataset that streams in remote data from Earth Engine.
     """
-    import xarray as xr
     import xee
 
     kwargs["drop_variables"] = drop_variables
@@ -11532,7 +11531,6 @@ def netcdf_to_tif(
         FileNotFoundError: If the netcdf file is not found.
         ValueError: If the variable is not found in the netcdf file.
     """
-    import xarray as xr
 
     if filename.startswith(("http://", "https://")):
         filename = coreutils.download_file(filename)
@@ -11582,9 +11580,8 @@ def read_netcdf(filename, **kwargs):
         FileNotFoundError: If the netcdf file is not found.
 
     Returns:
-        xarray.Dataset: The netcdf file as an xarray dataset.
+        xr.Dataset: The netcdf file as an xarray dataset.
     """
-    import xarray as xr
 
     if filename.startswith(("http://", "https://")):
         filename = coreutils.download_file(filename)
@@ -11641,7 +11638,6 @@ def netcdf_tile_layer(
     Returns:
         ipyleaflet.TileLayer | folium.TileLayer: An ipyleaflet.TileLayer or folium.TileLayer.
     """
-    import xarray as xr
 
     if filename.startswith(("http://", "https://")):
         filename = coreutils.download_file(filename)
@@ -12580,13 +12576,13 @@ def plot_raster(
     """Plot a raster image.
 
     Args:
-        image (str | xarray.DataArray ): The input raster image, can be a file path, HTTP URL, or xarray.DataArray.
+        image (str | xr.DataArray ): The input raster image, can be a file path, HTTP URL, or xr.DataArray.
         band: The band index, starting from zero. Defaults to None.
         cmap: The matplotlib colormap to use. Defaults to "terrain".
         proj: The EPSG projection code. Defaults to "EPSG:3857".
         figsize: The figure size as a tuple, such as (10, 8). Defaults to None.
         open_kwargs: The keyword arguments to pass to rioxarray.open_rasterio. Defaults to {}.
-        **kwargs: Additional keyword arguments to pass to xarray.DataArray.plot().
+        **kwargs: Additional keyword arguments to pass to xr.DataArray.plot().
     """
     open_kwargs = open_kwargs or {}
 
@@ -12596,14 +12592,13 @@ def plot_raster(
 
     import pvxarray
     import rioxarray
-    import xarray
 
     if isinstance(image, str):
         da = rioxarray.open_rasterio(image, **open_kwargs)
-    elif isinstance(image, xarray.DataArray):
+    elif isinstance(image, xr.DataArray):
         da = image
     else:
-        raise ValueError("image must be a string or xarray.Dataset.")
+        raise ValueError("image must be a string or xr.Dataset.")
 
     # pytype: disable=attribute-error
     if band is not None:
@@ -12635,7 +12630,7 @@ def plot_raster_3d(
     """Plot a raster image in 3D.
 
     Args:
-        image (str | xarray.DataArray): The input raster image, can be a file path, HTTP URL, or xarray.DataArray.
+        image (str | xr.DataArray): The input raster image, can be a file path, HTTP URL, or xr.DataArray.
         band (int, optional): The band index, starting from zero. Defaults to None.
         cmap (str, optional): The matplotlib colormap to use. Defaults to "terrain".
         factor (float, optional): The scaling factor for the raster. Defaults to 1.0.
@@ -12648,7 +12643,7 @@ def plot_raster_3d(
         component (str, optional): The component of the coordinates. Defaults to None.
         open_kwargs (dict, optional): The keyword arguments to pass to rioxarray.open_rasterio. Defaults to {}.
         mesh_kwargs (dict, optional): The keyword arguments to pass to pyvista.mesh.warp_by_scalar(). Defaults to {}.
-        **kwargs: Additional keyword arguments to pass to xarray.DataArray.plot().
+        **kwargs: Additional keyword arguments to pass to xr.DataArray.plot().
     """
     if coreutils.in_colab_shell():
         print("The plot_raster_3d() function is not supported in Colab.")
@@ -12657,7 +12652,6 @@ def plot_raster_3d(
     import pvxarray
     import pyvista
     import rioxarray
-    import xarray
 
     open_kwargs = open_kwargs or {}
     mesh_kwargs = mesh_kwargs or {}
@@ -12667,10 +12661,10 @@ def plot_raster_3d(
 
     if isinstance(image, str):
         da = rioxarray.open_rasterio(image, **open_kwargs)
-    elif isinstance(image, xarray.DataArray):
+    elif isinstance(image, xr.DataArray):
         da = image
     else:
-        raise ValueError("image must be a string or xarray.Dataset.")
+        raise ValueError("image must be a string or xr.Dataset.")
 
     # pytype: disable=attribute-error
     if band is not None:
@@ -14750,10 +14744,10 @@ def xee_to_image(
     quiet: bool = False,
     **kwargs,
 ) -> None:
-    """Convert xarray Dataset to georeferenced images.
+    """Convert xr.Dataset to georeferenced images.
 
     Args:
-        xds (xr.Dataset): The xarray Dataset to convert to images.
+        xds (xr.Dataset): The xr.Dataset to convert to images.
         filenames (str | list[str]] | None): Output filenames for the images.
             If a single string is provided, it will be used as the filename for all images.
             If a list of strings is provided, the filenames will be used in order. Defaults to None.
@@ -14859,7 +14853,6 @@ def array_to_memory_file(
         rasterio.DatasetReader: The rasterio dataset reader object for the converted array.
     """
     import rasterio
-    import xarray as xr
 
     if isinstance(array, xr.DataArray):
         coords = [coord for coord in array.coords]
@@ -14993,7 +14986,6 @@ def array_to_image(
         **kwargs: Additional keyword arguments to be passed to the rasterio.open() function.
     """
     import rasterio
-    import xarray as xr
 
     if output is None:
         return array_to_memory_file(
@@ -15135,10 +15127,10 @@ def is_on_aws() -> bool:
 
 
 def xarray_to_raster(dataset, filename: str, **kwargs) -> None:
-    """Convert an xarray Dataset to a raster file.
+    """Convert an xr.Dataset to a raster file.
 
     Args:
-        dataset (xr.Dataset): The input xarray Dataset to be converted.
+        dataset (xr.Dataset): The input xr.Dataset to be converted.
         filename: The output filename for the raster file.
         **kwargs: Additional keyword arguments passed to the `rio.to_raster()` method.
             See https://corteva.github.io/rioxarray/stable/examples/convert_to_raster.html for more info.
