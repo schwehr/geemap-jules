@@ -33,6 +33,7 @@ import pandas as pd
 import requests
 
 import box
+import xarray as xr
 from bqplot import pyplot as plt
 
 from IPython.display import display
@@ -2475,7 +2476,6 @@ class Map(core.Map):
             visible: Whether the layer is visible. Defaults to True.
             array_args: Additional arguments to pass to `array_to_memory_file` when reading the raster. Defaults to {}.
         """
-        import xarray as xr
 
         array_args = array_args or {}
 
@@ -4513,7 +4513,6 @@ class Map(core.Map):
             ImportError: If the xarray package is not installed.
             ValueError: If the data is not a NetCDF file or an xarray Dataset.
         """
-        import xarray as xr
 
         display_options = display_options or {}
 
