@@ -5,10 +5,17 @@ import unittest
 
 from click.testing import CliRunner
 
-from geemap import ai
+try:
+    from geemap import ai
+
+    HAS_AI = True
+except ImportError:
+    HAS_AI = False
+
 from geemap.cli import main
 
 
+@unittest.skipIf(not HAS_AI, "geemap.ai dependencies are not installed")
 class TestMatchesDatetime(unittest.TestCase):
 
     def setUp(self):
