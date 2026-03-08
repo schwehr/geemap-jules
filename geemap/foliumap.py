@@ -2463,10 +2463,10 @@ class Map(folium.Map):
                 basemap name.
             left_args (dict, optional): The arguments for the left tile layer. Defaults to {}.
             right_args (dict, optional): The arguments for the right tile layer. Defaults to {}.
-            left_label: TODO
-            right_label: TODO
-            left_position: TODO
-            right_position: TODO
+            left_label (str, optional): The label for the left map. Defaults to None.
+            right_label (str, optional): The label for the right map. Defaults to None.
+            left_position (str, optional): The position of the left label. Defaults to 'bottomleft'.
+            right_position (str, optional): The position of the right label. Defaults to 'bottomright'.
         """
         left_args = left_args or {}
         right_args = right_args or {}
