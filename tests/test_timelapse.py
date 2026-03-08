@@ -96,10 +96,6 @@ class TestTimelapse(unittest.TestCase):
         self.assertIn("ffmpeg", mock_system.call_args[0][0])
         self.assertIn("test_%d.png", mock_system.call_args[0][0])
 
-
-
-
-
     @mock.patch("geemap.timelapse.os.path.exists")
     @mock.patch("geemap.timelapse.os.makedirs")
     @mock.patch("geemap.timelapse.gif_to_png")
@@ -142,7 +138,6 @@ class TestTimelapse(unittest.TestCase):
 
         timelapse.add_progress_bar_to_gif("in.gif", "out.gif")
 
-
         mock_open.assert_called()
         self.assertEqual(mock_draw.call_count, 2)
 
@@ -179,13 +174,8 @@ class TestTimelapse(unittest.TestCase):
 
         timelapse.add_text_to_gif("in.gif", "out.gif", xy=("10%", "10%"), text_sequence=["A", "B"])
 
-
         mock_font.assert_called()
         self.assertEqual(mock_draw.call_count, 2)
-
-
-
-
 
     @mock.patch("geemap.timelapse.os.path.exists")
     @mock.patch("geemap.timelapse.os.makedirs")
@@ -214,12 +204,9 @@ class TestTimelapse(unittest.TestCase):
 
         timelapse.add_image_to_gif("in.gif", "out.gif", "logo.png", xy=(10, 10), circle_mask=True)
 
-
-
         # Verify paste is called on each frame
         mock_frame1.convert().paste.assert_called_once()
         mock_frame2.convert().paste.assert_called_once()
-
 
 if __name__ == '__main__':
     unittest.main()
