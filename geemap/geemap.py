@@ -31,9 +31,9 @@ import ipywidgets as widgets
 import numpy as np
 import pandas as pd
 import requests
+import xarray as xr
 
 import box
-import xarray as xr
 from bqplot import pyplot as plt
 
 from IPython.display import display

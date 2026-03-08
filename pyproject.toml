@@ -39,9 +39,9 @@ dependencies = [
     "pyperclip",
     "pyshp>=2.3.1",
     "python-box",
-    "xarray",
     "requests",
     "scooby",
+    "xarray",
 ]
 
 [project.scripts]
