@@ -916,14 +916,16 @@ class Map(folium.Map):
         """Add a colorbar to the map.
 
         Args:
-            vis_params: TODO.
+            vis_params: Visualization parameters as a dictionary. See
+                https://developers.google.com/earth-engine/guides/image_visualization for
+                options.
             index: The values corresponding to each color. It has to be sorted, and have
                 the same length as colors. If None, a regular grid between vmin and vmax
                 is created.
             label: The caption for the colormap.
             categorical: Whether or not to create a categorical colormap.
             step: The step to split the LinearColormap into a StepColormap.
-            background_color: TODO.
+            background_color: The background color of the colormap. Defaults to None.
             # TODO: Fix - these are in vis_params and are not normal args:
             colors (list): The set of colors to be used for interpolation. Colors can be
                 provided in the form: * tuples of RGBA ints between 0 and 255 (e.g:
