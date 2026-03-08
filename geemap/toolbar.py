@@ -1377,9 +1377,7 @@ def convert_js2py(m):
 
     full_widget = widgets.VBox(layout=widgets.Layout(width="465px", height="350px"))
     text_widget = widgets.Textarea(
-        placeholder=(
-            "Paste your Earth Engine JavaScript into this textbox."
-        ),
+        placeholder=("Paste your Earth Engine JavaScript into this textbox."),
         layout=widgets.Layout(width="455px", height="310px"),
     )
 

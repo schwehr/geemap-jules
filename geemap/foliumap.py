@@ -43,6 +43,7 @@ if not coreutils.in_colab_shell():
 
 def _get_basemaps():
     from .basemaps import xyz_to_folium
+
     return box.Box(xyz_to_folium(), frozen_box=True)
 
 

@@ -8,6 +8,7 @@ import folium
 import geemap
 from geemap import foliumap
 
+
 class TestFoliumap(unittest.TestCase):
 
     def test_map_init_default(self):
@@ -31,6 +32,7 @@ class TestFoliumap(unittest.TestCase):
     def test_add_marker(self):
         m = foliumap.Map(ee_initialize=False)
         m.add_marker(location=[40, -100], popup="Test")
+
 
 if __name__ == "__main__":
     unittest.main()
