@@ -1,5 +1,4 @@
 """Tests for the timelapse module."""
-
 import os
 import shutil
 import sys
@@ -7,10 +6,9 @@ import unittest
 from unittest import mock
 
 # To allow mock testing when ffmpeg-python is not installed
-sys.modules["ffmpeg"] = mock.MagicMock()
+sys.modules['ffmpeg'] = mock.MagicMock()
 
 from geemap import timelapse
-
 
 class TestTimelapse(unittest.TestCase):
     @mock.patch.object(os.path, "exists")
@@ -47,16 +45,12 @@ class TestTimelapse(unittest.TestCase):
 
         # the ffmpeg inside geemap.timelapse is locally imported and used inside the function
         import ffmpeg
-
-        with (
-            mock.patch.object(ffmpeg, "input") as mock_input,
-            mock.patch.object(ffmpeg, "output") as mock_output,
-            mock.patch.object(ffmpeg, "run") as mock_run,
-        ):
+        with mock.patch.object(ffmpeg, "input") as mock_input, \
+             mock.patch.object(ffmpeg, "output") as mock_output, \
+             mock.patch.object(ffmpeg, "run") as mock_run:
 
             timelapse.reduce_gif_size("in.gif", "out.gif")
             mock_run.assert_called_once()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

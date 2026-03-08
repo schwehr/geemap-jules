@@ -1347,7 +1347,6 @@ class Catalog:
 
         return code_samples_dict
 
-
 # @title Embeddings classes and helper methods
 
 

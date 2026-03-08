@@ -11,14 +11,12 @@ try:
     import pandas as pd
     import sklearn.ensemble
     import sklearn.tree
-
     HAS_SKLEARN = True
 except ImportError:
     HAS_SKLEARN = False
 
 from geemap import ml
 import ee
-
 
 class TestML(unittest.TestCase):
     @unittest.skipIf(not HAS_SKLEARN, "sklearn not installed")
@@ -29,9 +27,7 @@ class TestML(unittest.TestCase):
         clf = sklearn.tree.DecisionTreeClassifier(max_depth=2, random_state=42)
         clf.fit(X, y)
 
-        tree_str = ml.tree_to_string(
-            clf, feature_names=["f1", "f2"], output_mode="CLASSIFICATION"
-        )
+        tree_str = ml.tree_to_string(clf, feature_names=["f1", "f2"], output_mode="CLASSIFICATION")
         self.assertIsInstance(tree_str, str)
         self.assertTrue(tree_str.startswith("1) root"))
 
@@ -43,14 +39,12 @@ class TestML(unittest.TestCase):
         reg = sklearn.tree.DecisionTreeRegressor(max_depth=2, random_state=42)
         reg.fit(X, y)
 
-        tree_str = ml.tree_to_string(
-            reg, feature_names=["f1", "f2"], output_mode="REGRESSION"
-        )
+        tree_str = ml.tree_to_string(reg, feature_names=["f1", "f2"], output_mode="REGRESSION")
         self.assertIsInstance(tree_str, str)
         self.assertTrue(tree_str.startswith("1) root"))
 
     @unittest.skipIf(not HAS_SKLEARN, "sklearn not installed")
-    @mock.patch.object(multiprocessing, "Pool")
+    @mock.patch.object(multiprocessing, 'Pool')
     def test_rf_to_strings(self, mock_pool):
         # We need to mock multiprocessing because we don't want to actually spin up processes.
         mock_pool_instance = mock_pool.return_value.__enter__.return_value
@@ -61,25 +55,21 @@ class TestML(unittest.TestCase):
 
         X = np.array([[0, 0], [1, 1], [0, 1], [1, 0]])
         y = np.array([0, 1, 1, 0])
-        rf = sklearn.ensemble.RandomForestClassifier(
-            n_estimators=2, max_depth=2, random_state=42
-        )
+        rf = sklearn.ensemble.RandomForestClassifier(n_estimators=2, max_depth=2, random_state=42)
         rf.fit(X, y)
 
         # Mock classes_ to avoid issues if output_mode INFER logic needs it.
         rf.classes_ = np.array([0, 1])
         # Set criterion to gini so INFER mode knows it's a classifier.
-        rf.criterion = "gini"
+        rf.criterion = 'gini'
 
-        trees = ml.rf_to_strings(
-            rf, feature_names=["f1", "f2"], processes=1, output_mode="CLASSIFICATION"
-        )
+        trees = ml.rf_to_strings(rf, feature_names=["f1", "f2"], processes=1, output_mode="CLASSIFICATION")
         self.assertEqual(len(trees), 2)
         self.assertEqual(trees[0], "tree1_str")
         self.assertEqual(trees[1], "tree2_str")
 
-    @mock.patch.object(ee.Classifier, "decisionTreeEnsemble")
-    @mock.patch.object(ee, "String")
+    @mock.patch.object(ee.Classifier, 'decisionTreeEnsemble')
+    @mock.patch.object(ee, 'String')
     def test_strings_to_classifier(self, mock_ee_string, mock_ensemble):
         mock_ensemble.return_value = "mocked_classifier"
         mock_ee_string.side_effect = lambda x: x
@@ -90,7 +80,7 @@ class TestML(unittest.TestCase):
         mock_ensemble.assert_called_once()
         mock_ee_string.assert_any_call("tree1")
 
-    @mock.patch.object(ee.Classifier, "decisionTreeEnsemble")
+    @mock.patch.object(ee.Classifier, 'decisionTreeEnsemble')
     def test_fc_to_classifier(self, mock_ensemble):
         mock_ensemble.return_value = "mocked_classifier"
 
@@ -106,10 +96,10 @@ class TestML(unittest.TestCase):
         mock_ensemble.assert_called_once()
         mock_fc.aggregate_array.assert_called_with("tree")
 
-    @mock.patch.object(ee.batch.Export.table, "toAsset")
-    @mock.patch.object(ee, "FeatureCollection")
-    @mock.patch.object(ee, "Feature")
-    @mock.patch.object(ee.Geometry, "Point")
+    @mock.patch.object(ee.batch.Export.table, 'toAsset')
+    @mock.patch.object(ee, 'FeatureCollection')
+    @mock.patch.object(ee, 'Feature')
+    @mock.patch.object(ee.Geometry, 'Point')
     def test_export_trees_to_fc(self, mock_point, mock_feature, mock_fc, mock_to_asset):
         mock_task = mock.MagicMock()
         mock_to_asset.return_value = mock_task
@@ -123,7 +113,7 @@ class TestML(unittest.TestCase):
         mock_to_asset.assert_called_once_with(
             collection="mocked_fc",
             description="geemap_rf_export",
-            assetId="users/test/test_rf",
+            assetId="users/test/test_rf"
         )
         mock_task.start.assert_called_once()
 
@@ -138,13 +128,11 @@ class TestML(unittest.TestCase):
             self.assertIn("tree1#", content)
             self.assertIn("tree2#", content)
 
-    @mock.patch.object(ml, "fc_to_classifier")
-    @mock.patch.object(ee, "FeatureCollection")
-    @mock.patch.object(ee, "Feature")
-    @mock.patch.object(ee.Geometry, "Point")
-    def test_csv_to_classifier(
-        self, mock_point, mock_feature, mock_fc, mock_fc_to_classifier
-    ):
+    @mock.patch.object(ml, 'fc_to_classifier')
+    @mock.patch.object(ee, 'FeatureCollection')
+    @mock.patch.object(ee, 'Feature')
+    @mock.patch.object(ee.Geometry, 'Point')
+    def test_csv_to_classifier(self, mock_point, mock_feature, mock_fc, mock_fc_to_classifier):
         mock_fc_to_classifier.return_value = "mocked_classifier"
 
         trees = ["tree1", "tree2"]
@@ -161,5 +149,5 @@ class TestML(unittest.TestCase):
         self.assertIsNone(classifier)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
