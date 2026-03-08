@@ -176,7 +176,7 @@ def make_gif(
             cmd = f"ffmpeg -loglevel error -i {out_gif} -vcodec libx264 -crf 25 -pix_fmt yuv420p {out_mp4}"
             os.system(cmd)
             if not os.path.exists(out_mp4):
-                raise Exception(f"Failed to create mp4 file.")
+                raise Exception("Failed to create mp4 file.")
     if clean_up:
         for image in images:
             os.remove(image)
@@ -218,7 +218,7 @@ def gif_to_mp4(in_gif: str, out_mp4: str) -> None:
         os.system(cmd)
 
     if not os.path.exists(out_mp4):
-        raise Exception(f"Failed to create mp4 file.")
+        raise Exception("Failed to create mp4 file.")
 
 
 def merge_gifs(in_gifs: str | list[str], out_gif: str) -> None:
@@ -340,7 +340,7 @@ def gif_fading(
     for i in range(1, count):
         if i == 1:
             filters.append(
-                f"\"[1:v][0:v]blend=all_expr='A*(if(gte(T,3),1,T/3))+B*(1-(if(gte(T,3),1,T/3)))'[v0];"
+                "\"[1:v][0:v]blend=all_expr='A*(if(gte(T,3),1,T/3))+B*(1-(if(gte(T,3),1,T/3)))'[v0];"
             )
         else:
             filters.append(
