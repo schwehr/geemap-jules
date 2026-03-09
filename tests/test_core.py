@@ -5,6 +5,7 @@ from unittest import mock
 
 import ee
 import ipyleaflet
+import ipywidgets
 
 from geemap import core
 from geemap import map_widgets
@@ -184,6 +185,162 @@ class TestMap(unittest.TestCase):
         # Basemap selector and top right layout box.
         self.assertEqual(len(self.core_map.controls), 2)
 
+    def test_width_height_setters(self):
+        """Tests setting width and height of the map."""
+        self.core_map.width = "50%"
+        self.assertEqual(self.core_map.width, "50%")
+        self.core_map.height = "500px"
+        self.assertEqual(self.core_map.height, "500px")
+
+    def test_map_properties(self):
+        """Tests map properties for widgets."""
+        self.assertIsNone(self.core_map._layer_editor)
+        self.assertIsInstance(self.core_map._search_bar, map_widgets.SearchBar)
+        self.assertIsInstance(self.core_map._layer_manager, map_widgets.LayerManager)
+        self.assertIsNone(self.core_map._basemap_selector)
+        # The inspector is not added by default.
+        self.assertIsNone(self.core_map._inspector)
+
+    @mock.patch.object(map_widgets, "LayerEditor", create=True)
+    def test_add_remove_widgets(self, MockLayerEditor):
+        """Tests adding and removing widgets by name."""
+        self._clear_default_widgets()
+
+        # Add layer editor.
+        # Mocking the __new__ or return_value won't satisfy isinstance if LayerEditor is completely mocked out,
+        # so we patch Map._layer_editor and skip the actual addition to ee layers, but we want to test the add method.
+        # The add method uses map_widgets.LayerEditor.
+
+        # Let's mock out the _find_widget_of_type specifically for LayerEditor so it doesn't crash on isinstance(mock)
+        original_find = self.core_map._find_widget_of_type
+        def side_effect(widget_type, return_control=False):
+            if widget_type == MockLayerEditor:
+                return None
+            return original_find(widget_type, return_control)
+
+        self.core_map._find_widget_of_type = side_effect
+
+        MockLayerEditor.return_value = ipywidgets.DOMWidget()
+
+        self.core_map.add("layer_editor")
+
+        # We can't easily assert it's added due to the mocked type, but we can verify it doesn't error out.
+        self.core_map.add("layer_editor")
+
+        # Add search control.
+        self.core_map.add("search_control")
+        self.assertIsNotNone(self.core_map._search_bar)
+        self.core_map.add("search_control")
+
+        # Add layer manager.
+        self.core_map.add("layer_manager")
+        self.assertIsNotNone(self.core_map._layer_manager)
+        self.core_map.add("layer_manager")
+
+        # Add basemap selector.
+        self.core_map.add("basemap_selector")
+        self.assertIsNotNone(self.core_map._basemap_selector)
+        self.core_map.add("basemap_selector")
+
+        # Add inspector.
+        self.core_map.add("inspector")
+        self.assertIsNotNone(self.core_map._inspector)
+        self.core_map.add("inspector")
+
+        # Remove them.
+        self.core_map.remove("layer_editor")
+
+        self.core_map.remove("search_control")
+        self.assertIsNone(self.core_map._search_bar)
+
+        self.core_map.remove("layer_manager")
+        self.assertIsNone(self.core_map._layer_manager)
+
+        self.core_map.remove("basemap_selector")
+        self.assertIsNone(self.core_map._basemap_selector)
+
+        self.core_map.remove("inspector")
+        self.assertIsNone(self.core_map._inspector)
+
+        self.core_map.remove("draw_control")
+        self.assertIsNone(self.core_map.get_draw_control())
+
+    def test_add_layer_ee_object(self):
+        """Tests adding an ee.Image and ee.ImageCollection layer."""
+        img = fake_ee.Image()
+
+        class MockEELeafletTileLayer:
+            EE_TYPES = (fake_ee.Image, fake_ee.ImageCollection, type(mock.MagicMock()))
+            def __init__(self, *args, **kwargs):
+                pass
+
+        with mock.patch.object(core.ee_tile_layers, "EELeafletTileLayer", MockEELeafletTileLayer):
+            self.core_map.add_layer(img, name="test_image")
+            self.assertIn("test_image", self.core_map.ee_layers)
+            self.assertEqual(self.core_map.ee_layers["test_image"]["ee_object"], img)
+
+            # Fake image collection.
+            mock_col = fake_ee.ImageCollection([])
+            mock_col.mosaic = mock.Mock(return_value=fake_ee.Image())
+            self.core_map.add_layer(mock_col, name="test_collection")
+            self.assertIn("test_collection", self.core_map.ee_layers)
+
+        # Test non EE object fallback.
+        with mock.patch("ipyleaflet.Map.add_layer") as mock_super_add:
+            self.core_map.add_layer("not an ee object")
+            mock_super_add.assert_called_with("not an ee object")
+
+        # Remove layer.
+        self.core_map.remove("test_image")
+        self.assertNotIn("test_image", self.core_map.ee_layers)
+
+    def test_add_legend(self):
+        """Tests adding a legend."""
+        class MockEELeafletTileLayer:
+            EE_TYPES = (fake_ee.Image, fake_ee.ImageCollection, type(mock.MagicMock()))
+            def __init__(self, *args, **kwargs):
+                pass
+
+        with mock.patch.object(core.ee_tile_layers, "EELeafletTileLayer", MockEELeafletTileLayer):
+            self.core_map.add_layer(fake_ee.Image(), name="test_layer")
+
+        control = self.core_map._add_legend(title="test_legend", layer_name="test_layer")
+        self.assertIn("legend", self.core_map.ee_layers["test_layer"])
+
+        # Test replacement.
+        control2 = self.core_map._add_legend(title="test_legend2", layer_name="test_layer")
+        self.assertEqual(self.core_map.ee_layers["test_layer"]["legend"], control2)
+
+    def test_add_colorbar(self):
+        """Tests adding a colorbar."""
+        class MockEELeafletTileLayer:
+            EE_TYPES = (fake_ee.Image, fake_ee.ImageCollection, type(mock.MagicMock()))
+            def __init__(self, *args, **kwargs):
+                pass
+
+        with mock.patch.object(core.ee_tile_layers, "EELeafletTileLayer", MockEELeafletTileLayer):
+            self.core_map.add_layer(fake_ee.Image(), name="test_layer")
+
+        control = self.core_map._add_colorbar(vis_params={"min": 0, "max": 1, "palette": ["red", "blue"]}, layer_name="test_layer")
+        self.assertIn("colorbar", self.core_map.ee_layers["test_layer"])
+
+        # Test replacement.
+        control2 = self.core_map._add_colorbar(vis_params={"min": 0, "max": 1, "palette": ["red", "blue"]}, layer_name="test_layer")
+        self.assertEqual(self.core_map.ee_layers["test_layer"]["colorbar"], control2)
+
+        # Remove it.
+        self.core_map.remove("test_layer")
+        self.assertNotIn("test_layer", self.core_map.ee_layers)
+
+    def test_replace_basemap(self):
+        """Tests replacing basemap."""
+        # Try invalid.
+        self.core_map._replace_basemap("INVALID_BASEMAP")
+
+        # Try valid.
+        valid_basemap = next(iter(self.core_map._available_basemaps.keys()))
+        self.core_map._replace_basemap(valid_basemap)
+
 
 @mock.patch.object(ee, "FeatureCollection", fake_ee.FeatureCollection)
 @mock.patch.object(ee, "Feature", fake_ee.Feature)
@@ -326,6 +483,72 @@ class TestAbstractDrawControl(unittest.TestCase):
         self.assertEqual(len(self._draw_control.geo_jsons), 1)
         self.assertFalse("Drawn Features" in self.map.ee_layers)
 
+    def test_features_no_count(self):
+        self.assertEqual(self._draw_control.features, [])
+
+    def test_remove_geometry_none_or_not_found(self):
+        self._draw_control.create(self.geo_json)
+        self.assertEqual(len(self._draw_control.geometries), 1)
+        self._draw_control.remove_geometry(None)
+        self.assertEqual(len(self._draw_control.geometries), 1)
+
+        # Geometry not found.
+        geometry2 = fake_ee.Geometry(self.geo_json2["geometry"])
+        self._draw_control.remove_geometry(geometry2)
+        self.assertEqual(len(self._draw_control.geometries), 1)
+
+    def test_get_geometry_properties_none_or_not_found(self):
+        self._draw_control.create(self.geo_json)
+        self.assertIsNone(self._draw_control.get_geometry_properties(None))
+
+        # Geometry not found.
+        geometry2 = fake_ee.Geometry(self.geo_json2["geometry"])
+        self.assertIsNone(self._draw_control.get_geometry_properties(geometry2))
+
+    def test_set_geometry_properties_none_or_not_found(self):
+        self._draw_control.create(self.geo_json)
+        self.assertEqual(self._draw_control.properties, [None])
+
+        self._draw_control.set_geometry_properties(None, {"test": 1})
+        self.assertEqual(self._draw_control.properties, [None])
+
+        # Geometry not found.
+        geometry2 = fake_ee.Geometry(self.geo_json2["geometry"])
+        self._draw_control.set_geometry_properties(geometry2, {"test": 1})
+        self.assertEqual(self._draw_control.properties, [None])
+
+    def test_callbacks(self):
+        mock_callback = mock.Mock()
+
+        self._draw_control.on_geometry_create(mock_callback)
+        self._draw_control._geometry_create_dispatcher(self._draw_control, geometry=None)
+        mock_callback.assert_called_once()
+
+        mock_callback.reset_mock()
+        self._draw_control.on_geometry_edit(mock_callback)
+        self._draw_control._geometry_edit_dispatcher(self._draw_control, geometry=None)
+        mock_callback.assert_called_once()
+
+        mock_callback.reset_mock()
+        self._draw_control.on_geometry_delete(mock_callback)
+        self._draw_control._geometry_delete_dispatcher(self._draw_control, geometry=None)
+        mock_callback.assert_called_once()
+
+    def test_abstract_methods(self):
+        with self.assertRaises(NotImplementedError):
+            core.AbstractDrawControl(self.map)
+
+        # Bypass init to test other abstract methods.
+        abstract_draw_control = core.AbstractDrawControl.__new__(core.AbstractDrawControl)
+        with self.assertRaises(NotImplementedError):
+            abstract_draw_control._bind_to_draw_control()
+        with self.assertRaises(NotImplementedError):
+            abstract_draw_control._remove_geometry_at_index_on_draw_control(0)
+        with self.assertRaises(NotImplementedError):
+            abstract_draw_control._clear_draw_control()
+        with self.assertRaises(NotImplementedError):
+            abstract_draw_control._get_synced_geojson_from_draw_control()
+
     def test_remove_geometry(self):
         self._draw_control.create(self.geo_json)
         self._draw_control.create(self.geo_json2)
@@ -419,6 +642,145 @@ class TestAbstractDrawControl(unittest.TestCase):
             del self.geo_jsons[i]
             self._on_draw("deleted", geo_json)
 
+
+@mock.patch.object(ee, "FeatureCollection", fake_ee.FeatureCollection)
+@mock.patch.object(ee, "Feature", fake_ee.Feature)
+@mock.patch.object(ee, "Geometry", fake_ee.Geometry)
+@mock.patch.object(ee, "Image", fake_ee.Image)
+class TestMapDrawControl(unittest.TestCase):
+    """Tests for the `MapDrawControl`."""
+
+    geo_json = {
+        "type": "Feature",
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [0, 1],
+                    [0, -1],
+                    [1, -1],
+                    [1, 1],
+                    [0, 1],
+                ]
+            ],
+        },
+        "properties": {"name": "Null Island"},
+    }
+
+    def setUp(self):
+        super().setUp()
+        self.map = fake_map.FakeMap()
+        self._draw_control = core.MapDrawControl(self.map)
+
+    def test_get_synced_geojson_from_draw_control(self):
+        self._draw_control.data = [self.geo_json]
+        synced_data = self._draw_control._get_synced_geojson_from_draw_control()
+        self.assertEqual(synced_data, [self.geo_json])
+        # Ensure it's a copy.
+        self.assertIsNot(synced_data[0], self.geo_json)
+
+    def test_handle_draw_exception(self):
+        self._draw_control.data = [self.geo_json]
+
+        # Test exception catching in handle_draw.
+        with mock.patch.object(self._draw_control, "_handle_geometry_created", side_effect=Exception("Test Exception")):
+            with self.assertRaisesRegex(Exception, "Test Exception"):
+                # Call handle_draw which is bound to on_draw.
+                # We need to trigger the draw callback.
+                for callback in self._draw_control._draw_callbacks.callbacks:
+                    callback(self._draw_control, "created", self.geo_json)
+
+    def test_handle_data_update(self):
+        # We need to test the observe callback for 'data'.
+
+        # Mock _sync_geometries and _redraw_layer.
+        self._draw_control._sync_geometries = mock.Mock()
+        self._draw_control._redraw_layer = mock.Mock()
+
+        # Call the update handler directly via traitlets notify.
+        # _trait_notifiers is a dict mapping names to a list of EventHandler objects or similar in traitlets.
+        # The easiest way is to trigger it by changing the data trait directly.
+
+        # Test when last_draw_action is not EDITED.
+        self._draw_control.last_draw_action = core.DrawActions.CREATED
+        self._draw_control.data = [self.geo_json]
+
+        self._draw_control._sync_geometries.assert_called_once()
+        self._draw_control._redraw_layer.assert_not_called()
+
+        self._draw_control._sync_geometries.reset_mock()
+
+        # Test when last_draw_action is EDITED.
+        self._draw_control.last_draw_action = core.DrawActions.EDITED
+        self._draw_control.data = [self.geo_json, self.geo_json]
+
+        self._draw_control._sync_geometries.assert_called_once()
+        self._draw_control._redraw_layer.assert_called_once()
+
+    def test_remove_geometry_at_index_on_draw_control(self):
+        self._draw_control.data = [self.geo_json]
+        self._draw_control.send_state = mock.Mock()
+        self._draw_control._remove_geometry_at_index_on_draw_control(0)
+        self.assertEqual(self._draw_control.data, [])
+        self._draw_control.send_state.assert_called_once_with(key="data")
+
+    def test_clear_draw_control(self):
+        self._draw_control.data = [self.geo_json]
+        self._draw_control.clear = mock.Mock()
+        self._draw_control._clear_draw_control()
+        self.assertEqual(self._draw_control.data, [])
+        self._draw_control.clear.assert_called_once()
+
+class TestMapInterface(unittest.TestCase):
+    """Tests for the MapInterface."""
+
+    def test_abstract_methods(self):
+        map_interface = core.MapInterface()
+
+        with self.assertRaises(NotImplementedError):
+            map_interface.get_zoom()
+
+        with self.assertRaises(NotImplementedError):
+            map_interface.set_zoom(5)
+
+        with self.assertRaises(NotImplementedError):
+            map_interface.get_center()
+
+        with self.assertRaises(NotImplementedError):
+            map_interface.set_center(0, 0)
+
+        with self.assertRaises(NotImplementedError):
+            map_interface.center_object(None)
+
+        with self.assertRaises(NotImplementedError):
+            map_interface.get_scale()
+
+        with self.assertRaises(NotImplementedError):
+            map_interface.get_bounds()
+
+        with self.assertRaises(NotImplementedError):
+            _ = map_interface.width
+
+        with self.assertRaises(NotImplementedError):
+            map_interface.width = "100px"
+
+        with self.assertRaises(NotImplementedError):
+            _ = map_interface.height
+
+        with self.assertRaises(NotImplementedError):
+            map_interface.height = "100px"
+
+        with self.assertRaises(NotImplementedError):
+            map_interface.add("widget", "topleft")
+
+        with self.assertRaises(NotImplementedError):
+            map_interface.remove("widget")
+
+        with self.assertRaises(NotImplementedError):
+            map_interface.add_layer(None)
+
+        with self.assertRaises(NotImplementedError):
+            map_interface.remove_layer("layer")
 
 if __name__ == "__main__":
     unittest.main()
