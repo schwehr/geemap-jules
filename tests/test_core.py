@@ -759,13 +759,13 @@ class TestMapInterface(unittest.TestCase):
             map_interface.get_bounds()
 
         with self.assertRaises(NotImplementedError):
-            map_interface.width
+            _ = map_interface.width
 
         with self.assertRaises(NotImplementedError):
             map_interface.width = "100px"
 
         with self.assertRaises(NotImplementedError):
-            map_interface.height
+            _ = map_interface.height
 
         with self.assertRaises(NotImplementedError):
             map_interface.height = "100px"
