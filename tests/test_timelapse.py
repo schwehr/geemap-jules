@@ -9,6 +9,7 @@ from unittest import mock
 sys.modules['ffmpeg'] = mock.MagicMock()
 
 from geemap import timelapse
+from geemap import coreutils
 from tests import fake_ee
 import ee
 
@@ -210,7 +211,6 @@ class TestTimelapse(unittest.TestCase):
         mock_frame1.convert().paste.assert_called_once()
         mock_frame2.convert().paste.assert_called_once()
 
-    from geemap import coreutils
     @mock.patch.object(coreutils, 'ee_initialize')
     def test_add_overlay(self, mock_ee_initialize):
         # We need to mock ee.ImageCollection etc because geemap.timelapse directly checks isinstance(collection, ee.ImageCollection).
@@ -238,7 +238,11 @@ class TestTimelapse(unittest.TestCase):
                 # Mock inner methods used in the try block.
                 mock_img_class = mock.MagicMock()
                 mock_ee.Image = mock_img_class
-                mock_img_class.return_value.byte.return_value.setDefaultProjection.return_value.paint.return_value.visualize.return_value.setDefaultProjection.return_value = mock.MagicMock()
+                mock_byte = mock_img_class.return_value.byte.return_value
+                mock_proj = mock_byte.setDefaultProjection.return_value
+                mock_paint = mock_proj.paint.return_value
+                mock_vis = mock_paint.visualize.return_value
+                mock_vis.setDefaultProjection.return_value = mock.MagicMock()
 
                 # We need to ensure fake_col.map works and fake_col.first().projection() works.
                 # Add mock methods to fake_col.
