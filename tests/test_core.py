@@ -227,27 +227,27 @@ class TestMap(unittest.TestCase):
         # We can't easily assert it's added due to the mocked type, but we can verify it doesn't error out.
         self.core_map.add("layer_editor")
 
-        # Add search control
+        # Add search control.
         self.core_map.add("search_control")
         self.assertIsNotNone(self.core_map._search_bar)
         self.core_map.add("search_control")
 
-        # Add layer manager
+        # Add layer manager.
         self.core_map.add("layer_manager")
         self.assertIsNotNone(self.core_map._layer_manager)
         self.core_map.add("layer_manager")
 
-        # Add basemap selector
+        # Add basemap selector.
         self.core_map.add("basemap_selector")
         self.assertIsNotNone(self.core_map._basemap_selector)
         self.core_map.add("basemap_selector")
 
-        # Add inspector
+        # Add inspector.
         self.core_map.add("inspector")
         self.assertIsNotNone(self.core_map._inspector)
         self.core_map.add("inspector")
 
-        # Remove them
+        # Remove them.
         self.core_map.remove("layer_editor")
 
         self.core_map.remove("search_control")
@@ -279,18 +279,18 @@ class TestMap(unittest.TestCase):
             self.assertIn("test_image", self.core_map.ee_layers)
             self.assertEqual(self.core_map.ee_layers["test_image"]["ee_object"], img)
 
-            # fake image collection
+            # Fake image collection.
             mock_col = fake_ee.ImageCollection([])
             mock_col.mosaic = mock.Mock(return_value=fake_ee.Image())
             self.core_map.add_layer(mock_col, name="test_collection")
             self.assertIn("test_collection", self.core_map.ee_layers)
 
-        # test non EE object fallback
+        # Test non EE object fallback.
         with mock.patch("ipyleaflet.Map.add_layer") as mock_super_add:
             self.core_map.add_layer("not an ee object")
             mock_super_add.assert_called_with("not an ee object")
 
-        # remove layer
+        # Remove layer.
         self.core_map.remove("test_image")
         self.assertNotIn("test_image", self.core_map.ee_layers)
 
@@ -307,7 +307,7 @@ class TestMap(unittest.TestCase):
         control = self.core_map._add_legend(title="test_legend", layer_name="test_layer")
         self.assertIn("legend", self.core_map.ee_layers["test_layer"])
 
-        # Test replacement
+        # Test replacement.
         control2 = self.core_map._add_legend(title="test_legend2", layer_name="test_layer")
         self.assertEqual(self.core_map.ee_layers["test_layer"]["legend"], control2)
 
@@ -324,20 +324,20 @@ class TestMap(unittest.TestCase):
         control = self.core_map._add_colorbar(vis_params={"min": 0, "max": 1, "palette": ["red", "blue"]}, layer_name="test_layer")
         self.assertIn("colorbar", self.core_map.ee_layers["test_layer"])
 
-        # Test replacement
+        # Test replacement.
         control2 = self.core_map._add_colorbar(vis_params={"min": 0, "max": 1, "palette": ["red", "blue"]}, layer_name="test_layer")
         self.assertEqual(self.core_map.ee_layers["test_layer"]["colorbar"], control2)
 
-        # Remove it
+        # Remove it.
         self.core_map.remove("test_layer")
         self.assertNotIn("test_layer", self.core_map.ee_layers)
 
     def test_replace_basemap(self):
         """Tests replacing basemap."""
-        # Try invalid
+        # Try invalid.
         self.core_map._replace_basemap("INVALID_BASEMAP")
 
-        # Try valid
+        # Try valid.
         valid_basemap = next(iter(self.core_map._available_basemaps.keys()))
         self.core_map._replace_basemap(valid_basemap)
 
