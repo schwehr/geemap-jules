@@ -919,8 +919,7 @@ def pie_chart(
         opacity: Value between 0 and 1. Sets the opacity for markers.
         hole: Fraction of the radius to cut out of the pie. Use this to make a donut
             chart.
-        layout_args: Layout arguments for the plot to be passed to fig.update_layout(),
-            such as {'title':'Plot Title', 'title_x':0.5}.
+        layout_args: TODO
 
     Returns:
         plotly.graph_objs._figure.Figure: A plotly figure object.
