@@ -206,7 +206,7 @@ class TestMap(unittest.TestCase):
         """Tests adding and removing widgets by name."""
         self._clear_default_widgets()
 
-        # Add layer editor
+        # Add layer editor.
         # Mocking the __new__ or return_value won't satisfy isinstance if LayerEditor is completely mocked out,
         # so we patch Map._layer_editor and skip the actual addition to ee layers, but we want to test the add method.
         # The add method uses map_widgets.LayerEditor.
