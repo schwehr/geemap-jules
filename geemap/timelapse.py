@@ -3688,7 +3688,7 @@ def landsat_ts_norm_diff_gif(
     frames_per_second: int = 10,
     mp4: bool = False,
 ) -> str:
-    """Creates a timelapse GIF/MP4 from a Landsat normalized difference timeseries.
+    """TODO: [summary]
 
     Args:
         collection (ee.ImageCollection): The normalized difference Landsat timeseries.
