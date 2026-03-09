@@ -567,13 +567,16 @@ class BarChart(BaseChartClass):
         self.type: str = type
 
     def generate_tooltip(self) -> None:
-        """Generates a tooltip for the bar chart."""
+        """Generates a tooltip for the chart."""
+        chart_obj = getattr(self, "bar_chart", getattr(self, "line_chart", None))
+        if chart_obj is None:
+            return
         if (self.x_label is not None) and (self.y_label is not None):
-            self.bar_chart.tooltip = bq.Tooltip(
+            chart_obj.tooltip = bq.Tooltip(
                 fields=["x", "y"], labels=[self.x_label, self.y_label]
             )
         else:
-            self.bar_chart.tooltip = bq.Tooltip(
+            chart_obj.tooltip = bq.Tooltip(
                 fields=["x", "y"]
             )  # pytype: disable=attribute-error
 
@@ -587,18 +590,18 @@ class BarChart(BaseChartClass):
             ylim_min, ylim_max = self.ylim[0], self.ylim[1]
         else:
             # pytype: disable=attribute-error
-            if self.name in ["feature.byFeature", "feature.byProperty"]:
-                ylim_min = np.min(self.y_data)
-                ylim_max = np.max(self.y_data) + 0.2 * (
-                    np.max(self.y_data) - np.min(self.y_data)
-                )
             if self.name in ["feature.groups"]:
                 ylim_min = np.min(self.df[self.yProperty])
                 ylim_max = np.max(self.df[self.yProperty])
                 ylim_max = ylim_max + 0.2 * (ylim_max - ylim_min)
+            else:
+                ylim_min = np.min(self.y_data)
+                ylim_max = np.max(self.y_data) + 0.2 * (
+                    np.max(self.y_data) - np.min(self.y_data)
+                )
             # pytype: enable=attribute-error
 
-        return ylim_min, ylim_max
+        return float(ylim_min), float(ylim_max)
 
     def plot_chart(self) -> None:
         """Plots the bar chart."""
@@ -799,7 +802,10 @@ class Feature_Groups(BarChart):
             type: The type of bar chart ('grouped' or 'stacked').
             **kwargs: Additional keyword arguments to set as attributes.
         """
-        df = common.ee_to_df(features)
+        if isinstance(features, ee.FeatureCollection):
+            df = common.ee_to_df(features)
+        else:
+            df = features
         self.unique_series_values = df[series_property].unique().tolist()
         default_labels = [str(x) for x in self.unique_series_values]
         self.yProperty = y_property

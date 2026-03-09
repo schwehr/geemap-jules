@@ -3,6 +3,8 @@
 import unittest
 
 import pandas as pd
+from unittest.mock import patch, MagicMock
+
 from geemap import chart
 
 
@@ -94,6 +96,171 @@ class ChartTest(unittest.TestCase):
         self.assertEqual(list(df["time"]), [10, 20, 30])
         self.assertEqual(list(df["a"]), [1.0, 2.0, 3.0])
         self.assertEqual(list(df["b"]), [4.0, 5.0, 6.0])
+
+    @patch("geemap.chart.plt.show")
+    @patch("geemap.chart.display")
+    def test_chart_class(self, mock_display, mock_show):
+        """Test the Chart class with different chart types."""
+        data = {"x": ["1", "2", "3"], "y1": [4, 5, 6], "y2": [7, 8, 9]}
+
+        for chart_type in [
+            "LineChart",
+            "ScatterChart",
+            "ColumnChart",
+            "BarChart",
+            "PieChart",
+            "AreaChart",
+            "Table",
+        ]:
+            c = chart.Chart(
+                data,
+                chart_type=chart_type,
+                x_cols="x",
+                y_cols=["y1", "y2"],
+                title=f"Test {chart_type}",
+                x_label="X Axis",
+                y_label="Y Axis",
+            )
+            self.assertIsInstance(c, chart.Chart)
+            self.assertEqual(c.get_chart_type(), chart_type)
+            self.assertEqual(c.title, f"Test {chart_type}")
+            self.assertEqual(c.x_label, "X Axis")
+            self.assertEqual(c.y_label, "Y Axis")
+
+            c.display()
+            self._ipython_display_ = getattr(c, "_ipython_display_", None)
+            if self._ipython_display_:
+                c._ipython_display_()
+
+        # IntervalChart has a specific format.
+        c = chart.Chart(
+            {"x": [1, 2, 3], "y1": [4, 5, 6], "y2": [7, 8, 9]},
+            chart_type="IntervalChart",
+            x_cols=["x"],
+            y_cols=["y1", "y2"],
+        )
+        self.assertEqual(c.get_chart_type(), "IntervalChart")
+
+        # Test setting properties.
+        c = chart.Chart(data, chart_type="LineChart", x_cols="x", y_cols=["y1"])
+        c.set_options(title="New Title")
+        self.assertEqual(c.figure.title, "New Title")
+
+        dt = chart.DataTable({"x": [10], "y": [20]})
+        c.set_data_table(dt)
+        self.assertEqual(c.get_data_table().shape, (1, 2))
+
+    @patch("geemap.chart.plt.Figure.save_png")
+    def test_chart_save_png(self, mock_save_png):
+        data = {"x": [1, 2], "y": [3, 4]}
+        c = chart.Chart(data, chart_type="LineChart", x_cols="x", y_cols=["y"])
+        c.save_png("test.png")
+        mock_save_png.assert_called_once_with("test.png", scale=1.0)
+
+    def test_base_chart_class(self):
+        """Test BaseChartClass."""
+        df = pd.DataFrame({"x": [1, 2], "y": [3, 4]})
+        base = chart.BaseChartClass(df, default_labels=["label1"], name="test_base")
+        self.assertEqual(base.name, "test_base")
+        self.assertEqual(base.labels, ["label1"])
+        self.assertTrue(hasattr(base, "df"))
+        self.assertEqual(repr(base), "test_base")
+        base.get_data()
+        base.plot_chart()
+
+    @patch("geemap.chart.plt.show")
+    def test_bar_chart(self, mock_show):
+        """Test BarChart."""
+        df = pd.DataFrame({"x": [1, 2], "y": [3, 4]})
+        bar = chart.BarChart(df, default_labels=["label1"], name="test_bar")
+        bar.x_data = [1, 2]
+        bar.y_data = [3, 4]
+        bar.plot_chart()
+        mock_show.assert_called()
+
+        self.assertEqual(bar.get_ylim(), (3.0, 4.2))
+
+        # Test specific naming for get_ylim
+        bar.name = "feature.byFeature"
+        self.assertEqual(bar.get_ylim(), (3.0, 4.2))
+
+    @patch("geemap.chart.plt.show")
+    def test_line_chart(self, mock_show):
+        """Test LineChart."""
+        df = pd.DataFrame({"x": [1, 2], "y": [3, 4]})
+        line = chart.LineChart(df, labels=["label1"], name="test_line")
+        line.x_data = [1, 2]
+        line.y_data = [3, 4]
+        line.plot_chart()
+        mock_show.assert_called()
+
+    def test_feature_by_feature(self):
+        """Test Feature_ByFeature."""
+        df = pd.DataFrame({"x": [1, 2], "y1": [3, 4], "y2": [5, 6]})
+        fb = chart.Feature_ByFeature(df, x_property="x", y_properties=["y1", "y2"])
+        self.assertEqual(fb.x_data, [1, 2])
+        self.assertEqual(len(fb.y_data), 2)
+
+    def test_feature_by_property(self):
+        """Test Feature_ByProperty."""
+        df = pd.DataFrame({"x_prop": [1, 2], "y_prop": [3, 4], "series": ["A", "B"]})
+        fb_list = chart.Feature_ByProperty(
+            df, x_properties=["x_prop", "y_prop"], series_property="series"
+        )
+        self.assertEqual(fb_list.x_data, ["x_prop", "y_prop"])
+
+        fb_dict = chart.Feature_ByProperty(
+            df, x_properties={"x_prop": "X", "y_prop": "Y"}, series_property="series"
+        )
+        self.assertEqual(fb_dict.x_data, ["X", "Y"])
+
+        with self.assertRaises(Exception):
+            chart.Feature_ByProperty(df, x_properties="invalid", series_property="series")
+
+        with self.assertRaises(Exception):
+             chart.Feature_ByProperty(df, x_properties=["x"], series_property="s", labels=["1"])
+
+    def test_feature_groups(self):
+        """Test Feature_Groups."""
+        df = pd.DataFrame(
+            {"x": [1, 2, 3], "y": [10, 20, 30], "series": ["A", "A", "B"]}
+        )
+        fg = chart.Feature_Groups(df, x_property="x", y_property="y", series_property="series")
+        self.assertEqual(fg.unique_series_values, ["A", "B"])
+        self.assertEqual(len(fg.x_data), 3)
+        self.assertEqual(len(fg.y_data), 2)
+
+    @patch("geemap.chart.Feature_ByFeature.plot_chart")
+    def test_feature_by_feature_func(self, mock_plot):
+        """Test feature_by_feature function."""
+        df = pd.DataFrame({"x": [1], "y1": [2]})
+        chart.feature_by_feature(df, "x", ["y1"])
+        mock_plot.assert_called_once()
+
+    @patch("geemap.chart.Feature_ByProperty.plot_chart")
+    def test_feature_by_property_func(self, mock_plot):
+        """Test feature_by_property function."""
+        df = pd.DataFrame({"x_prop": [1, 2], "y_prop": [3, 4], "series": ["A", "B"]})
+        chart.feature_by_property(df, ["x_prop", "y_prop"], "series")
+        mock_plot.assert_called_once()
+
+    @patch("geemap.chart.Feature_Groups.plot_chart")
+    def test_feature_groups_func(self, mock_plot):
+        """Test feature_groups function."""
+        df = pd.DataFrame(
+            {"x": [1, 2, 3], "y": [10, 20, 30], "series": ["A", "A", "B"]}
+        )
+        chart.feature_groups(df, "x", "y", "series")
+        mock_plot.assert_called_once()
+
+    @patch("geemap.chart.array_to_df")
+    @patch("geemap.chart.Chart")
+    def test_array_values(self, mock_chart, mock_array_to_df):
+        """Test array_values function."""
+        mock_array_to_df.return_value = pd.DataFrame({"x": [1, 2], "y1": [3, 4]})
+        chart.array_values([[1, 2], [3, 4]])
+        mock_chart.assert_called_once()
+        mock_array_to_df.assert_called_once()
 
 
 if __name__ == "__main__":
