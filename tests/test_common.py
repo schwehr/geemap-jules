@@ -1359,9 +1359,9 @@ class CommonTest(unittest.TestCase):
     def test_ee_export_image_collection(self, mock_export):
         # Mock image collection.
         collection_mock = mock.MagicMock(spec=ee.ImageCollection)
-        collection_mock.size().getInfo.return_value = 2
-        collection_mock.aggregate_array().getInfo.return_value = ["img1", "img2"]
-        collection_mock.toList().get.side_effect = ["image1_obj", "image2_obj"]
+        collection_mock.size.return_value.getInfo.return_value = 2
+        collection_mock.aggregate_array.return_value.getInfo.return_value = ["img1", "img2"]
+        collection_mock.toList.return_value.get.side_effect = ["image1_obj", "image2_obj"]
 
         # Mock ee.Image instantiation.
         with mock.patch.object(ee, "Image") as mock_ee_image:
@@ -1485,9 +1485,9 @@ class CommonTest(unittest.TestCase):
     def test_ee_export_image_collection_to_drive(self, mock_export):
         # Mock image collection.
         collection_mock = mock.MagicMock(spec=ee.ImageCollection)
-        collection_mock.size().getInfo.return_value = 2
-        collection_mock.aggregate_array().getInfo.return_value = ["img1", "img2"]
-        collection_mock.toList().get.side_effect = ["image1_obj", "image2_obj"]
+        collection_mock.size.return_value.getInfo.return_value = 2
+        collection_mock.aggregate_array.return_value.getInfo.return_value = ["img1", "img2"]
+        collection_mock.toList.return_value.get.side_effect = ["image1_obj", "image2_obj"]
 
         # Mock ee.Image instantiation.
         with mock.patch.object(ee, "Image") as mock_ee_image:
