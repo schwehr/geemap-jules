@@ -326,7 +326,7 @@ class TestTimelapse(unittest.TestCase):
                 res6 = timelapse.valid_roi("invalid")
                 self.assertIsNone(res6)
 
-    @mock.patch("geemap.timelapse.ee.Geometry.Polygon")
+    @mock.patch.object(ee.Geometry, "Polygon")
     def test_sentinel1_defaults(self, mock_polygon):
         mock_polygon.return_value = fake_ee.Geometry.Polygon([[0, 0]])
         year, roi = timelapse.sentinel1_defaults()
