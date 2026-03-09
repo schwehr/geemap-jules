@@ -38,11 +38,15 @@ class TestCartoee(unittest.TestCase):
         # with cax
         cax = fig.add_axes([0.1, 0.1, 0.8, 0.05])
         cartoee.add_colorbar(ax, vis_params, cax=cax)
+        self.assertEqual(len(fig.axes), 3)
 
         # loc left, bottom, top
         cartoee.add_colorbar(ax, vis_params, loc="left", label="Left Label", tick_font_size=10)
+        self.assertEqual(len(fig.axes), 4)
         cartoee.add_colorbar(ax, vis_params, loc="bottom", discrete=True)
+        self.assertEqual(len(fig.axes), 5)
         cartoee.add_colorbar(ax, vis_params, loc="top", cmap="viridis")
+        self.assertEqual(len(fig.axes), 6)
 
         # invalid ax
         with self.assertRaises(ValueError):
@@ -96,13 +100,17 @@ class TestCartoee(unittest.TestCase):
 
         # Test with interval list
         cartoee.add_gridlines(ax, interval=[60, 30])
+        self.assertEqual(len(ax.get_xticks()), 7)
 
         # Test with n_ticks
         cartoee.add_gridlines(ax, n_ticks=5)
+        self.assertEqual(len(ax.get_xticks()), 5)
         cartoee.add_gridlines(ax, n_ticks=[5, 5])
+        self.assertEqual(len(ax.get_xticks()), 5)
 
         # Test with xs and ys
         cartoee.add_gridlines(ax, xs=np.array([-100, 0, 100]), ys=np.array([-50, 0, 50]))
+        self.assertEqual(len(ax.get_xticks()), 3)
 
         # missing arguments
         with self.assertRaises(ValueError):
@@ -126,6 +134,9 @@ class TestCartoee(unittest.TestCase):
 
         # factor list
         cartoee.pad_view(ax, factor=[0.2, 0.3])
+        result = ax.get_xlim()
+        self.assertAlmostEqual(result[0], -16.8)
+        self.assertAlmostEqual(result[1], 16.8)
 
     def test_add_scale_bar(self):
         fig = plt.figure()
@@ -134,6 +145,7 @@ class TestCartoee(unittest.TestCase):
 
         # normal scale bar
         cartoee.add_scale_bar(ax, 10)
+        self.assertTrue(len(ax.patches) > 0)
 
     def test_add_scale_bar_lite(self):
         fig = plt.figure()
@@ -142,9 +154,11 @@ class TestCartoee(unittest.TestCase):
 
         # normal lite scale bar
         cartoee.add_scale_bar_lite(ax)
+        self.assertTrue(len(ax.texts) > 0)
 
         # with length
         cartoee.add_scale_bar_lite(ax, length=50)
+        self.assertTrue(len(ax.texts) > 1)
 
         # invalid unit
         cartoee.add_scale_bar_lite(ax, unit="invalid")
@@ -158,7 +172,10 @@ class TestCartoee(unittest.TestCase):
     def test_create_legend(self):
         with self.assertRaises(ValueError):
             cartoee.create_legend()
-        cartoee.create_legend(linewidth=2)
+
+        # the function create_legend currently just returns None
+        result = cartoee.create_legend(linewidth=2)
+        self.assertIsNone(result)
 
     def test_add_legend(self):
         fig = plt.figure()
@@ -197,7 +214,7 @@ class TestCartoee(unittest.TestCase):
             out_gif = "test.gif"
 
             # Simple run
-            with mock.patch("geemap.cartoee.ee.Date", return_value=mock.Mock(format=lambda x: mock.Mock(getInfo=lambda: "2020-01-01"))):
+            with mock.patch.object(fake_ee, "Date", return_value=mock.Mock(format=lambda x: mock.Mock(getInfo=lambda: "2020-01-01")), create=True):
                 cartoee.get_image_collection_gif(
                     ic, tmpdir, out_gif, vis_params={}, region=[-10, -10, 10, 10],
                     plot_title="Title"
@@ -205,7 +222,7 @@ class TestCartoee(unittest.TestCase):
             mock_png_to_gif.assert_called_once()
 
             # Run with mp4 and overlays
-            with mock.patch("geemap.cartoee.ee.Date", return_value=mock.Mock(format=lambda x: mock.Mock(getInfo=lambda: "2020-01-01"))):
+            with mock.patch.object(fake_ee, "Date", return_value=mock.Mock(format=lambda x: mock.Mock(getInfo=lambda: "2020-01-01")), create=True):
                 with mock.patch.dict("sys.modules", {"cv2": mock.MagicMock()}):
                     import cv2
                     cv2.imread.return_value = np.zeros((10, 10, 3), dtype=np.uint8)
@@ -297,16 +314,20 @@ class TestCartoee(unittest.TestCase):
         # Test basic add_layer
         cartoee.add_layer(ax, ee_img)
         self.assertTrue(mock_get.called)
+        self.assertTrue(len(ax.images) > 0)
 
         # Test with region
         cartoee.add_layer(ax, ee_img, region=[-10, -10, 10, 10])
+        self.assertTrue(len(ax.images) > 1)
 
         # Test with feature collection
         fc = fake_ee.FeatureCollection()
         cartoee.add_layer(ax, fc)
+        self.assertTrue(len(ax.images) > 2)
 
         # Test with vis params
         cartoee.add_layer(ax, ee_img, vis_params={"min": 0, "max": 100})
+        self.assertTrue(len(ax.images) > 3)
 
         # Test exceptions
         with self.assertRaises(ValueError):
