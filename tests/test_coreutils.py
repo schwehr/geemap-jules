@@ -193,15 +193,15 @@ class TestHelpers(unittest.TestCase):
             sys.modules.pop("google.colab", None)
             self.assertFalse(coreutils.in_colab_shell())
 
-    @mock.patch("geemap.coreutils.webbrowser.open_new_tab")
+    @mock.patch.object(coreutils.webbrowser, "open_new_tab")
     def test_open_url(self, mock_open_new_tab):
         """Tests open_url."""
         coreutils.open_url("https://example.com")
         mock_open_new_tab.assert_called_once_with("https://example.com")
 
-    @mock.patch("geemap.coreutils.in_colab_shell")
-    @mock.patch("geemap.coreutils.display")
-    @mock.patch("geemap.coreutils.Javascript")
+    @mock.patch.object(coreutils, "in_colab_shell")
+    @mock.patch.object(coreutils, "display")
+    @mock.patch.object(coreutils, "Javascript")
     def test_open_url_colab(self, mock_javascript, mock_display, mock_in_colab_shell):
         """Tests open_url in colab."""
         mock_in_colab_shell.return_value = True
@@ -212,8 +212,8 @@ class TestHelpers(unittest.TestCase):
         )
         mock_display.assert_called_once_with("mock_js")
 
-    @mock.patch("geemap.coreutils.display")
-    @mock.patch("geemap.coreutils.Javascript")
+    @mock.patch.object(coreutils, "display")
+    @mock.patch.object(coreutils, "Javascript")
     def test_create_code_cell(self, mock_javascript, mock_display):
         """Tests create_code_cell."""
         mock_javascript.return_value = "mock_js"
