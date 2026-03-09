@@ -217,7 +217,7 @@ class TestHelpers(unittest.TestCase):
     def test_create_code_cell(self, mock_javascript, mock_display):
         """Tests create_code_cell."""
         mock_javascript.return_value = "mock_js"
-        # We don't care about pyperclip for this test, just that it creates the display output
+        # We don't care about pyperclip for this test, just that it creates the display output.
         coreutils.create_code_cell("print('hello')", "below")
         mock_javascript.assert_called_once()
         mock_display.assert_called_once_with("mock_js")
