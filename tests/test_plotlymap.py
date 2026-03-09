@@ -196,7 +196,7 @@ class PlotlymapTest(unittest.TestCase):
             m.add_ee_layer("not_an_ee_object")
 
     def test_add_ee_layer_image(self):
-        from . import fake_ee
+        from tests import fake_ee
         m = plotlymap.Map(ee_initialize=False)
         img = fake_ee.Image()
         with mock.patch("geemap.plotlymap.ee.Image", fake_ee.Image), \
@@ -373,11 +373,11 @@ class PlotlymapTest(unittest.TestCase):
             mock_file.assert_any_call(expected_path, "w")
 
             # Verify write was called with the replacement text
-        handle = mock_file()
-        expected_replace = """if not BaseFigure._is_key_path_compatible(key_path_str, self.layout):
+            handle = mock_file()
+            expected_replace = """if not BaseFigure._is_key_path_compatible(key_path_str, self.layout):
                 if key_path_str == "mapbox._derived":
                     return"""
-        handle.write.assert_called_once_with(expected_replace)
+            handle.write.assert_called_once_with(expected_replace)
 
 
     def test_remove_layer(self):
