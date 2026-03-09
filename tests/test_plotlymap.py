@@ -17,7 +17,7 @@ except ImportError:
 @unittest.skipUnless(PLOTLY_AVAILABLE, "plotly not available")
 class PlotlymapTest(unittest.TestCase):
 
-    @mock.patch("geemap.coreutils.ee_initialize")
+    @mock.patch.object(plotlymap.coreutils, "ee_initialize")
     def test_map_init_ee_initialize(self, mock_ee_initialize):
         m = plotlymap.Map(ee_initialize=True)
         mock_ee_initialize.assert_called_once()
@@ -145,14 +145,14 @@ class PlotlymapTest(unittest.TestCase):
         m = plotlymap.Map(ee_initialize=False)
         canvas_widget = m.show(toolbar=True)
         self.assertIsNotNone(canvas_widget)
-        # Without toolbar, it should call super().show() which returns None implicitly or a plotly figure object depending on the env
-        # In testing context it usually returns None
+        # Without toolbar, it should call super().show() which returns None implicitly or a plotly figure object depending on the env.
+        # In testing context it usually returns None.
         ret = m.show(toolbar=False)
         self.assertIsNone(ret)
 
     def test_clear_controls(self):
         m = plotlymap.Map(ee_initialize=False)
-        # Mock the super().show or Map.show to just test it is called correctly
+        # Mock the super().show or Map.show to just test it is called correctly.
         with mock.patch.object(plotlymap.Map, "show") as mock_show:
             m.clear_controls()
             mock_show.assert_called_once()
@@ -167,11 +167,11 @@ class PlotlymapTest(unittest.TestCase):
 
     def test_add_basemap_already_present(self):
         m = plotlymap.Map(ee_initialize=False)
-        # Ensure it is empty first
+        # Ensure it is empty first.
         m.layout.mapbox.layers = []
         m.add_basemap("ROADMAP")
         self.assertEqual(len(m.layout.mapbox.layers), 1)
-        # Add again, should remove and add
+        # Add again, should remove and add.
         m.add_basemap("ROADMAP")
         self.assertEqual(len(m.layout.mapbox.layers), 1)
         self.assertEqual(m.layout.mapbox.layers[0]["name"], "ROADMAP")
@@ -199,11 +199,11 @@ class PlotlymapTest(unittest.TestCase):
         from tests import fake_ee
         m = plotlymap.Map(ee_initialize=False)
         img = fake_ee.Image()
-        with mock.patch("geemap.plotlymap.ee.Image", fake_ee.Image), \
-             mock.patch("geemap.plotlymap.ee.ImageCollection", fake_ee.ImageCollection), \
-             mock.patch("geemap.plotlymap.ee.FeatureCollection", fake_ee.FeatureCollection), \
-             mock.patch("geemap.plotlymap.ee.Feature", fake_ee.Feature), \
-             mock.patch("geemap.plotlymap.ee.Geometry", fake_ee.Geometry):
+        with mock.patch.object(plotlymap.ee, "Image", fake_ee.Image), \
+             mock.patch.object(plotlymap.ee, "ImageCollection", fake_ee.ImageCollection), \
+             mock.patch.object(plotlymap.ee, "FeatureCollection", fake_ee.FeatureCollection), \
+             mock.patch.object(plotlymap.ee, "Feature", fake_ee.Feature), \
+             mock.patch.object(plotlymap.ee, "Geometry", fake_ee.Geometry):
 
             m.add_ee_layer(img, name="fake_ee_img")
             self.assertIn("fake_ee_img", m.get_tile_layers())
@@ -212,8 +212,8 @@ class PlotlymapTest(unittest.TestCase):
         m = plotlymap.Map(ee_initialize=False)
         self.assertEqual(m.addLayer, m.add_ee_layer)
 
-    @mock.patch("geemap.plotlymap.cog_tile")
-    @mock.patch("geemap.plotlymap.cog_center")
+    @mock.patch.object(plotlymap, "cog_tile")
+    @mock.patch.object(plotlymap, "cog_center")
     def test_add_cog_layer(self, mock_cog_center, mock_cog_tile):
         mock_cog_tile.return_value = "https://example.com/cog_tile.png"
         mock_cog_center.return_value = (-100, 40)
@@ -227,8 +227,8 @@ class PlotlymapTest(unittest.TestCase):
         self.assertEqual(m.layout.mapbox.center.lon, -100)
         self.assertEqual(m.layout.mapbox.center.lat, 40)
 
-    @mock.patch("geemap.plotlymap.stac_tile")
-    @mock.patch("geemap.plotlymap.stac_center")
+    @mock.patch.object(plotlymap, "stac_tile")
+    @mock.patch.object(plotlymap, "stac_center")
     def test_add_stac_layer(self, mock_stac_center, mock_stac_tile):
         mock_stac_tile.return_value = "https://example.com/stac_tile.png"
         mock_stac_center.return_value = (-100, 40)
@@ -243,50 +243,52 @@ class PlotlymapTest(unittest.TestCase):
         self.assertEqual(m.layout.mapbox.center.lat, 40)
 
 
-    @mock.patch("geemap.plotlymap.planet_by_month")
+    @mock.patch.object(plotlymap, "planet_by_month")
     def test_add_planet_by_month(self, mock_planet_by_month):
         mock_planet_by_month.return_value = "https://example.com/planet_month.png"
 
+        import os
         m = plotlymap.Map(ee_initialize=False)
-        with mock.patch("os.environ.get", return_value="fake_planet_key"):
+        with mock.patch.object(os.environ, "get", return_value="fake_planet_key"):
             m.add_planet_by_month(year=2020, month=5)
 
-            # geemap passes the API key if provided, or defaults to the token_name (which gets fetched by planet_by_month)
+            # geemap passes the API key if provided, or defaults to the token_name (which gets fetched by planet_by_month).
             # wait, inspecting geemap.plotlymap:
             # tile_url = planet_by_month(year, month, api_key, token_name)
             mock_planet_by_month.assert_called_once_with(2020, 5, None, "PLANET_API_KEY")
             self.assertIn("2020-05", m.get_tile_layers())
 
-    @mock.patch("geemap.plotlymap.planet_by_quarter")
+    @mock.patch.object(plotlymap, "planet_by_quarter")
     def test_add_planet_by_quarter(self, mock_planet_by_quarter):
         mock_planet_by_quarter.return_value = "https://example.com/planet_quarter.png"
 
+        import os
         m = plotlymap.Map(ee_initialize=False)
-        with mock.patch("os.environ.get", return_value="fake_planet_key"):
+        with mock.patch.object(os.environ, "get", return_value="fake_planet_key"):
             m.add_planet_by_quarter(year=2020, quarter=2)
 
             mock_planet_by_quarter.assert_called_once_with(2020, 2, None, "PLANET_API_KEY")
             self.assertIn("2020-q2", m.get_tile_layers())
 
-    @mock.patch("geemap.plotlymap.json.loads")
+    @mock.patch.object(plotlymap.json, "loads")
     def test_add_choropleth_map(self, mock_json_loads):
         try:
             import geopandas as gpd
             from shapely.geometry import Point
 
-            # Create a mock GeoDataFrame
+            # Create a mock GeoDataFrame.
             df = pd.DataFrame({"value": [1, 2]})
             geometry = [Point(0, 0), Point(1, 1)]
             gdf = gpd.GeoDataFrame(df, geometry=geometry)
             gdf.crs = "EPSG:4326"
 
-            with mock.patch("geopandas.read_file") as mock_read_file:
+            with mock.patch.object(gpd, "read_file") as mock_read_file:
                 mock_read_file.return_value = gdf
                 mock_json_loads.return_value = {"type": "FeatureCollection", "features": []}
 
                 m = plotlymap.Map(ee_initialize=False)
                 # Plotly's graph_objects uses add_choroplethmapbox automatically via validation, or it might just use it directly, but in Map class:
-                # `self.add_choroplethmapbox` is inherited from `go.FigureWidget`
+                # `self.add_choroplethmapbox` is inherited from `go.FigureWidget`.
                 with mock.patch.object(m, "add_choroplethmapbox") as mock_add_choropleth:
                     m.add_choropleth_map("fake_data.geojson", name="choro_test", z="value")
                     mock_read_file.assert_called_once_with("fake_data.geojson")
@@ -299,12 +301,12 @@ class PlotlymapTest(unittest.TestCase):
     def test_add_scatter_plot_demo(self):
         m = plotlymap.Map(ee_initialize=False)
         m.add_scatter_plot_demo()
-        self.assertEqual(len(m.data), 2)  # Base trace + scatter trace
+        self.assertEqual(len(m.data), 2)  # Base trace + scatter trace.
         self.assertEqual(m.data[-1].name, "Random points")
 
-    @mock.patch("pandas.read_csv")
+    @mock.patch.object(pd, "read_csv")
     def test_add_heatmap_demo(self, mock_read_csv):
-        # Create a dummy dataframe for earthquakes
+        # Create a dummy dataframe for earthquakes.
         df = pd.DataFrame({
             "Latitude": [34.0, 35.0],
             "Longitude": [-118.0, -119.0],
@@ -313,14 +315,14 @@ class PlotlymapTest(unittest.TestCase):
         mock_read_csv.return_value = df
 
         m = plotlymap.Map(ee_initialize=False)
-        # Mocking add_basemap so we don't have to worry about missing 'Esri.WorldTopoMap'
+        # Mocking add_basemap so we don't have to worry about missing 'Esri.WorldTopoMap'.
         with mock.patch.object(m, "add_basemap") as mock_add_basemap:
             m.add_heatmap_demo()
             mock_read_csv.assert_called_once()
             self.assertIn("Earthquake", m.get_data_layers())
             mock_add_basemap.assert_called_once_with("Esri.WorldTopoMap")
 
-    @mock.patch("geemap.plotlymap.px.choropleth_mapbox")
+    @mock.patch.object(plotlymap.px, "choropleth_mapbox")
     def test_add_gdf(self, mock_px_choropleth):
         try:
             import geopandas as gpd
@@ -331,7 +333,7 @@ class PlotlymapTest(unittest.TestCase):
             gdf = gpd.GeoDataFrame(df, geometry=geometry)
             gdf.crs = "EPSG:4326"
 
-            # Mock the figure returned by px.choropleth_mapbox
+            # Mock the figure returned by px.choropleth_mapbox.
             class DummyFig:
                 data = [{"type": "choroplethmapbox", "name": "gdf_trace"}]
             mock_px_choropleth.return_value = DummyFig()
@@ -351,16 +353,16 @@ class PlotlymapTest(unittest.TestCase):
             mock_write_image.assert_called_once_with("test.png", format="png", width=800, height=600, scale=None)
 
 
-    @mock.patch("shutil.copyfile")
+    @mock.patch.object(plotlymap.shutil, "copyfile")
     @mock.patch("builtins.open", new_callable=mock.mock_open, read_data="if not BaseFigure._is_key_path_compatible(key_path_str, self.layout):")
-    @mock.patch("os.path.join")
+    @mock.patch.object(plotlymap.os.path, "join")
     def test_fix_widget_error(self, mock_path_join, mock_file, mock_copyfile):
         def join_side_effect(*args):
             return "/".join(args)
         mock_path_join.side_effect = join_side_effect
 
-        # Need to patch os.path.dirname and os.__file__ to control the root path
-        with mock.patch("os.path.dirname", return_value="fake_dir"), mock.patch("geemap.plotlymap.os.__file__", "fake_file.py"):
+        # Need to patch os.path.dirname and os.__file__ to control the root path.
+        with mock.patch.object(plotlymap.os.path, "dirname", return_value="fake_dir"), mock.patch.object(plotlymap.os, "__file__", "fake_file.py"):
             plotlymap.fix_widget_error()
 
             expected_path = "fake_dir/site-packages/plotly/basedatatypes.py"
@@ -368,11 +370,11 @@ class PlotlymapTest(unittest.TestCase):
 
             mock_copyfile.assert_called_once_with(expected_path, expected_bk_path)
 
-            # Check that open was called to read and write
+            # Check that open was called to read and write.
             mock_file.assert_any_call(expected_path)
             mock_file.assert_any_call(expected_path, "w")
 
-            # Verify write was called with the replacement text
+            # Verify write was called with the replacement text.
             handle = mock_file()
             expected_replace = """if not BaseFigure._is_key_path_compatible(key_path_str, self.layout):
                 if key_path_str == "mapbox._derived":
