@@ -210,9 +210,10 @@ class TestTimelapse(unittest.TestCase):
         mock_frame1.convert().paste.assert_called_once()
         mock_frame2.convert().paste.assert_called_once()
 
-    @mock.patch('geemap.coreutils.ee_initialize')
+    from geemap import coreutils
+    @mock.patch.object(coreutils, 'ee_initialize')
     def test_add_overlay(self, mock_ee_initialize):
-        # We need to mock ee.ImageCollection etc because geemap.timelapse directly checks isinstance(collection, ee.ImageCollection)
+        # We need to mock ee.ImageCollection etc because geemap.timelapse directly checks isinstance(collection, ee.ImageCollection).
         with mock.patch("geemap.timelapse.ee") as mock_ee:
             # Must mock coreutils.geojson_to_ee if it's called
             with mock.patch("geemap.coreutils.geojson_to_ee") as mock_geojson_to_ee:
@@ -288,7 +289,8 @@ class TestTimelapse(unittest.TestCase):
                     res_col8 = timelapse.add_overlay(fake_col, fake_fc, region=fake_fc)
                     self.assertEqual(res_col8, fake_col)
 
-    @mock.patch('geemap.coreutils.ee_initialize')
+    from geemap import coreutils
+    @mock.patch.object(coreutils, 'ee_initialize')
     def test_valid_roi(self, mock_ee_initialize):
         with mock.patch("geemap.timelapse.ee") as mock_ee:
             mock_ee.Geometry = fake_ee.Geometry
