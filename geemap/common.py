@@ -1721,8 +1721,7 @@ def install_from_github(url: str) -> None:
     work_dir = os.getcwd()
     os.chdir(pkg_dir)
     print(f"Installing {pkg_name}...")
-    cmd = "pip install ."
-    os.system(cmd)
+    subprocess.run(["pip", "install", "."], check=True)
     os.chdir(work_dir)
     print(f"{pkg_name} has been installed successfully.")
 
@@ -1733,16 +1732,21 @@ def check_git_install() -> bool:
     Returns:
         Returns True if Git is installed, otherwise returns False.
     """
-    cmd = "git --version"
-    output = os.popen(cmd).read()
+    try:
+        output = subprocess.check_output(
+            ["git", "--version"], stderr=subprocess.STDOUT, text=True
+        )
+        if "git version" in output:
+            return True
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        pass
 
-    if "git version" in output:
-        return True
-    else:
-        url = "https://git-scm.com/downloads"
-        print(f"Git is not installed. Please download Git from {url} and install it.")
-        webbrowser.open_new_tab(url)
-        return False
+    url = "https://git-scm.com/downloads"
+    print(f"Git is not installed. Please download Git from {url} and install it.")
+    webbrowser.open_new_tab(url)
+    return False
+
+
 
 
 def clone_github_repo(url: str, out_dir: str) -> None:
@@ -1805,8 +1809,7 @@ def clone_google_repo(url: str, out_dir: str | None = None):
         return
 
     if check_git_install():
-        cmd = f'git clone "{url}" "{out_dir}"'
-        os.popen(cmd).read()
+        subprocess.run(["git", "clone", url, out_dir], check=True)
 
 
 def open_github(subdir: str | None = None) -> None:
@@ -12785,9 +12788,9 @@ def requireJS(lib_path=None, Map=None):
 def setupJS():
     """Install npm packages for Earth Engine JavaScript libraries. Based on the Open Earth Engine Library (OEEL)."""
     try:
-        os.system("npm install @google/earthengine")
-        os.system("npm install zeromq@6.0.0-beta.6")
-        os.system("npm install request")
+        subprocess.run(["npm", "install", "@google/earthengine"], check=True)
+        subprocess.run(["npm", "install", "zeromq@6.0.0-beta.6"], check=True)
+        subprocess.run(["npm", "install", "request"], check=True)
     except Exception as e:
         raise Exception(
             f"Error installing npm packages: {e}. Make sure that you have installed nodejs. See https://nodejs.org/"
@@ -12813,8 +12816,7 @@ def change_require(lib_path):
         start_index = lib_path.index("/", lib_path.index("/") + 1) + 1
         lib_path = lib_path[start_index:].replace(":", "/")
         if not os.path.exists(lib_path):
-            cmd = f"git clone {repo}"
-            os.system(cmd)
+            subprocess.run(["git", "clone", repo], check=True)
 
     if not os.path.exists(lib_path):
         raise ValueError(f"{lib_path} does not exist.")

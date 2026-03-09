@@ -13,6 +13,7 @@ import math
 import os
 import re
 import shutil
+import subprocess
 import tempfile
 from typing import Any
 import warnings
@@ -173,8 +174,21 @@ def make_gif(
 
         if os.path.exists(out_gif):
             out_mp4 = out_gif.replace(".gif", ".mp4")
-            cmd = f"ffmpeg -loglevel error -i {out_gif} -vcodec libx264 -crf 25 -pix_fmt yuv420p {out_mp4}"
-            os.system(cmd)
+            args = [
+                "ffmpeg",
+                "-loglevel",
+                "error",
+                "-i",
+                out_gif,
+                "-vcodec",
+                "libx264",
+                "-crf",
+                "25",
+                "-pix_fmt",
+                "yuv420p",
+                out_mp4,
+            ]
+            subprocess.run(args, check=True)
             if not os.path.exists(out_mp4):
                 raise Exception("Failed to create mp4 file.")
     if clean_up:
@@ -206,16 +220,41 @@ def gif_to_mp4(in_gif: str, out_mp4: str) -> None:
     width, height = Image.open(in_gif).size
 
     if width % 2 == 0 and height % 2 == 0:
-        cmd = f"ffmpeg -loglevel error -i {in_gif} -vcodec libx264 -crf 25 -pix_fmt yuv420p {out_mp4}"
-        os.system(cmd)
+        args = [
+            "ffmpeg",
+            "-loglevel",
+            "error",
+            "-i",
+            in_gif,
+            "-vcodec",
+            "libx264",
+            "-crf",
+            "25",
+            "-pix_fmt",
+            "yuv420p",
+            out_mp4,
+        ]
+        subprocess.run(args, check=True)
     else:
         width += width % 2
         height += height % 2
-        cmd = (
-            f"ffmpeg -loglevel error -i {in_gif} -vf scale={width}:{height} "
-            f"-vcodec libx264 -crf 25 -pix_fmt yuv420p {out_mp4}"
-        )
-        os.system(cmd)
+        args = [
+            "ffmpeg",
+            "-loglevel",
+            "error",
+            "-i",
+            in_gif,
+            "-vf",
+            f"scale={width}:{height}",
+            "-vcodec",
+            "libx264",
+            "-crf",
+            "25",
+            "-pix_fmt",
+            "yuv420p",
+            out_mp4,
+        ]
+        subprocess.run(args, check=True)
 
     if not os.path.exists(out_mp4):
         raise Exception("Failed to create mp4 file.")
@@ -236,10 +275,8 @@ def merge_gifs(in_gifs: str | list[str], out_gif: str) -> None:
     elif not isinstance(in_gifs, list):
         raise Exception("in_gifs must be a list.")
 
-    in_gifs = " ".join(in_gifs)
-
-    cmd = f"gifsicle {in_gifs} > {out_gif}"
-    os.system(cmd)
+    with open(out_gif, "wb") as f:
+        subprocess.run(["gifsicle"] + in_gifs, stdout=f, check=True)
 
 
 def gif_to_png(
@@ -274,8 +311,17 @@ def gif_to_png(
         raise Exception("out_dir must be a string.")
 
     out_dir = os.path.abspath(out_dir)
-    cmd = f"ffmpeg -loglevel error -i {in_gif} -vsync 0 {out_dir}/{prefix}%d.png"
-    os.system(cmd)
+    args = [
+        "ffmpeg",
+        "-loglevel",
+        "error",
+        "-i",
+        in_gif,
+        "-vsync",
+        "0",
+        f"{out_dir}/{prefix}%d.png",
+    ]
+    subprocess.run(args, check=True)
 
     if verbose:
         print(f"Images are saved to {out_dir}")
@@ -340,7 +386,7 @@ def gif_fading(
     for i in range(1, count):
         if i == 1:
             filters.append(
-                "\"[1:v][0:v]blend=all_expr='A*(if(gte(T,3),1,T/3))+B*(1-(if(gte(T,3),1,T/3)))'[v0];"
+                "[1:v][0:v]blend=all_expr='A*(if(gte(T,3),1,T/3))+B*(1-(if(gte(T,3),1,T/3)))'[v0];"
             )
         else:
             filters.append(
@@ -350,13 +396,16 @@ def gif_fading(
     last_filter = ""
     for i in range(count - 1):
         last_filter += f"[v{i}]"
-    last_filter += f'concat=n={count-1}:v=1:a=0[v]" -map "[v]"'
+    last_filter += f"concat=n={count-1}:v=1:a=0[v]"
     filters.append(last_filter)
-    filters = " ".join(filters)
+    filters_str = " ".join(filters)
 
-    cmd = f"ffmpeg -y -loglevel error {inputs} -filter_complex {filters} {out_gif}"
+    args = ["ffmpeg", "-y", "-loglevel", "error"]
+    for i in range(1, count + 1):
+        args.extend(["-loop", "1", "-t", str(duration), "-i", f"{i}.png"])
+    args.extend(["-filter_complex", filters_str, "-map", "[v]", out_gif])
 
-    os.system(cmd)
+    subprocess.run(args, check=True)
     try:
         shutil.rmtree(temp_dir)
     except Exception as e:
