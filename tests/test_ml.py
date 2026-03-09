@@ -202,9 +202,9 @@ class TestML(unittest.TestCase):
 
     @unittest.skipIf(not HAS_SKLEARN, "sklearn not installed")
     def test_tree_to_string_probability_value_error(self):
-        # Trigger ValueError if raw_vals.shape[-1] != 2
+        # Trigger ValueError if raw_vals.shape[-1] != 2.
         X = np.array([[0, 0], [1, 1], [0, 1], [1, 0]])
-        y = np.array([0, 1, 2, 0])  # 3 classes
+        y = np.array([0, 1, 2, 0])  # 3 classes.
         clf = sklearn.tree.DecisionTreeClassifier(max_depth=2, random_state=42)
         clf.fit(X, y)
         with self.assertRaisesRegex(ValueError, "shape mismatch: outputs from trees"):
@@ -286,7 +286,7 @@ class TestML(unittest.TestCase):
         y = np.array([0.1, 0.9])
         rf = sklearn.ensemble.RandomForestRegressor(n_estimators=2, random_state=42)
         rf.fit(X, y)
-        # Force criterion to squared_error (which used to be mse) or mae
+        # Force criterion to squared_error (which used to be mse) or mae.
         rf.criterion = 'mse'
 
         trees = ml.rf_to_strings(rf, feature_names=["f1", "f2"], output_mode="INFER")
@@ -337,7 +337,7 @@ class TestML(unittest.TestCase):
         # Requesting 10 processes, but cpu_count is 2, so it should cap at 1.
         trees = ml.rf_to_strings(rf, feature_names=["f1", "f2"], output_mode="CLASSIFICATION", processes=10)
         self.assertEqual(len(trees), 2)
-        # Ensure Pool was called with processes=1
+        # Ensure Pool was called with processes=1.
         mock_pool.assert_called_with(1)
 
 if __name__ == '__main__':
