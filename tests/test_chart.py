@@ -2,8 +2,9 @@
 
 import unittest
 
+from unittest.mock import patch
+
 import pandas as pd
-from unittest.mock import patch, MagicMock
 
 from geemap import chart
 
@@ -99,7 +100,7 @@ class ChartTest(unittest.TestCase):
 
     @patch("geemap.chart.plt.show")
     @patch("geemap.chart.display")
-    def test_chart_class(self, mock_display, mock_show):
+    def test_chart_class(self, _, __):
         """Test the Chart class with different chart types."""
         data = {"x": ["1", "2", "3"], "y1": [4, 5, 6], "y2": [7, 8, 9]}
 
@@ -128,9 +129,9 @@ class ChartTest(unittest.TestCase):
             self.assertEqual(c.y_label, "Y Axis")
 
             c.display()
-            self._ipython_display_ = getattr(c, "_ipython_display_", None)
-            if self._ipython_display_:
-                c._ipython_display_()
+            ipython_display = getattr(c, "_ipython_display_", None)
+            if ipython_display is not None:
+                ipython_display()
 
         # IntervalChart has a specific format.
         c = chart.Chart(
@@ -152,6 +153,7 @@ class ChartTest(unittest.TestCase):
 
     @patch("geemap.chart.plt.Figure.save_png")
     def test_chart_save_png(self, mock_save_png):
+        """Test save_png method of Chart class."""
         data = {"x": [1, 2], "y": [3, 4]}
         c = chart.Chart(data, chart_type="LineChart", x_cols="x", y_cols=["y"])
         c.save_png("test.png")
@@ -172,17 +174,17 @@ class ChartTest(unittest.TestCase):
     def test_bar_chart(self, mock_show):
         """Test BarChart."""
         df = pd.DataFrame({"x": [1, 2], "y": [3, 4]})
-        bar = chart.BarChart(df, default_labels=["label1"], name="test_bar")
-        bar.x_data = [1, 2]
-        bar.y_data = [3, 4]
-        bar.plot_chart()
+        bar_chart = chart.BarChart(df, default_labels=["label1"], name="test_bar")
+        bar_chart.x_data = [1, 2]
+        bar_chart.y_data = [3, 4]
+        bar_chart.plot_chart()
         mock_show.assert_called()
 
-        self.assertEqual(bar.get_ylim(), (3.0, 4.2))
+        self.assertEqual(bar_chart.get_ylim(), (3.0, 4.2))
 
         # Test specific naming for get_ylim
-        bar.name = "feature.byFeature"
-        self.assertEqual(bar.get_ylim(), (3.0, 4.2))
+        bar_chart.name = "feature.byFeature"
+        self.assertEqual(bar_chart.get_ylim(), (3.0, 4.2))
 
     @patch("geemap.chart.plt.show")
     def test_line_chart(self, mock_show):
@@ -218,7 +220,7 @@ class ChartTest(unittest.TestCase):
             chart.Feature_ByProperty(df, x_properties="invalid", series_property="series")
 
         with self.assertRaises(Exception):
-             chart.Feature_ByProperty(df, x_properties=["x"], series_property="s", labels=["1"])
+            chart.Feature_ByProperty(df, x_properties=["x"], series_property="s", labels=["1"])
 
     def test_feature_groups(self):
         """Test Feature_Groups."""
