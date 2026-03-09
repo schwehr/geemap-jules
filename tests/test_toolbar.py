@@ -141,5 +141,151 @@ class TestToolbar(unittest.TestCase):
         self.assertFalse(a_toolboor.main_tools[0].active)
 
 
+
+from unittest.mock import MagicMock, patch
+
+class TestToolbarCallbacks(unittest.TestCase):
+    @patch('geemap.common.planet_tiles')
+    @patch('geemap.toolbar.split_basemaps')
+    def test_split_basemaps_tool_callback(self, mock_split_basemaps, mock_planet_tiles):
+        m = MagicMock()
+        item = MagicMock()
+
+        toolbar._split_basemaps_tool_callback(m, True, item)
+        mock_split_basemaps.assert_called_once()
+        mock_split_basemaps.reset_mock()
+        toolbar._split_basemaps_tool_callback(m, False, item)
+        mock_split_basemaps.assert_not_called()
+
+    def test_open_help_page_callback(self):
+        m = MagicMock()
+        item = MagicMock()
+        with patch('webbrowser.open_new_tab') as mock_open_new_tab:
+            toolbar._open_help_page_callback(m, True, item)
+            mock_open_new_tab.assert_called_once_with("https://geemap.org")
+            mock_open_new_tab.reset_mock()
+            toolbar._open_help_page_callback(m, False, item)
+            mock_open_new_tab.assert_not_called()
+
+    @patch('geemap.toolbar.ee_plot_gui')
+    def test_plotting_tool_callback(self, mock_ee_plot_gui):
+        m = MagicMock()
+        item = MagicMock()
+        toolbar._plotting_tool_callback(m, True, item)
+        mock_ee_plot_gui.assert_called_once_with(m)
+        self.assertEqual(item.control, m._plot_dropdown_control)
+
+    def test_inspector_tool_callback(self):
+        m = MagicMock()
+        item = MagicMock()
+        toolbar._inspector_tool_callback(m, True, item)
+        m.add_inspector.assert_called_once()
+        self.assertEqual(item.control, m._inspector)
+
+    @patch('geemap.toolbar.timelapse_gui')
+    def test_timelapse_tool_callback(self, mock_timelapse_gui):
+        m = MagicMock()
+        item = MagicMock()
+        toolbar._timelapse_tool_callback(m, True, item)
+        mock_timelapse_gui.assert_called_once_with(m)
+        self.assertEqual(item.control, m.tool_control)
+
+    @patch('geemap.toolbar.convert_js2py')
+    def test_convert_js_tool_callback(self, mock_convert_js2py):
+        m = MagicMock()
+        item = MagicMock()
+        toolbar._convert_js_tool_callback(m, True, item)
+        mock_convert_js2py.assert_called_once_with(m)
+        self.assertEqual(item.control, m._convert_ctrl)
+
+    def test_basemap_tool_callback(self):
+        m = MagicMock()
+        item = MagicMock()
+        toolbar._basemap_tool_callback(m, True, item)
+        m.add_basemap_widget.assert_called_once()
+        self.assertEqual(item.control, m._basemap_selector)
+
+    @patch('geemap.toolbar.open_data_widget')
+    def test_open_data_tool_callback(self, mock_open_data_widget):
+        m = MagicMock()
+        item = MagicMock()
+        toolbar._open_data_tool_callback(m, True, item)
+        mock_open_data_widget.assert_called_once_with(m)
+        self.assertEqual(item.control, m._tool_output_ctrl)
+
+    @patch('geemap.toolbar.build_toolbox')
+    @patch('geemap.toolbar.get_tools_dict')
+    @patch('ipyleaflet.WidgetControl')
+    def test_gee_toolbox_tool_callback(self, mock_WidgetControl, mock_get_tools_dict, mock_build_toolbox):
+        m = MagicMock()
+        item = MagicMock()
+        toolbar._gee_toolbox_tool_callback(m, True, item)
+        mock_build_toolbox.assert_called_once()
+        mock_get_tools_dict.assert_called_once()
+        m.add.assert_called_once_with(mock_WidgetControl.return_value)
+
+    @patch('geemap.toolbar.time_slider')
+    def test_time_slider_tool_callback(self, mock_time_slider):
+        m = MagicMock()
+        item = MagicMock()
+        toolbar._time_slider_tool_callback(m, True, item)
+        mock_time_slider.assert_called_once_with(m)
+        self.assertEqual(item.control, m.tool_control)
+
+    @patch('geemap.toolbar.collect_samples')
+    def test_collect_samples_tool_callback(self, mock_collect_samples):
+        m = MagicMock()
+        item = MagicMock()
+        toolbar._collect_samples_tool_callback(m, True, item)
+        mock_collect_samples.assert_called_once_with(m)
+        self.assertEqual(item.control, m.training_ctrl)
+
+    @patch('geemap.toolbar.plot_transect')
+    def test_plot_transect_tool_callback(self, mock_plot_transect):
+        m = MagicMock()
+        item = MagicMock()
+        toolbar._plot_transect_tool_callback(m, True, item)
+        mock_plot_transect.assert_called_once_with(m)
+        self.assertEqual(item.control, m.tool_control)
+
+    @patch('geemap.toolbar.sankee_gui')
+    def test_sankee_tool_callback(self, mock_sankee_gui):
+        m = MagicMock()
+        item = MagicMock()
+        toolbar._sankee_tool_callback(m, True, item)
+        mock_sankee_gui.assert_called_once_with(m)
+        self.assertEqual(item.control, m.tool_control)
+
+    @patch('geemap.toolbar.inspector_gui')
+    def test_cog_stac_inspector_callback(self, mock_inspector_gui):
+        m = MagicMock()
+        item = MagicMock()
+        toolbar._cog_stac_inspector_callback(m, True, item)
+        mock_inspector_gui.assert_called_once_with(m)
+        self.assertEqual(item.control, m.tool_control)
+
+    @patch('ipyleaflet.WidgetControl')
+    def test_whitebox_tool_callback(self, mock_WidgetControl):
+        m = MagicMock()
+        item = MagicMock()
+        with patch.dict('sys.modules', {'whiteboxgui': MagicMock(), 'whiteboxgui.whiteboxgui': MagicMock()}):
+            toolbar._whitebox_tool_callback(m, True, item)
+            m.add.assert_called_once()
+
+
+class TestToolbarGetTools(unittest.TestCase):
+    def test_get_main_tools(self):
+        tools = toolbar.get_main_tools()
+        self.assertIsInstance(tools, list)
+        self.assertTrue(len(tools) > 0)
+        self.assertIsInstance(tools[0], toolbar.ToolbarItem)
+
+    def test_get_extra_tools(self):
+        tools = toolbar.get_extra_tools()
+        self.assertIsInstance(tools, list)
+        self.assertTrue(len(tools) > 0)
+        self.assertIsInstance(tools[0], toolbar.ToolbarItem)
+
+
 if __name__ == "__main__":
     unittest.main()
