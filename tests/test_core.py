@@ -198,7 +198,7 @@ class TestMap(unittest.TestCase):
         self.assertIsInstance(self.core_map._search_bar, map_widgets.SearchBar)
         self.assertIsInstance(self.core_map._layer_manager, map_widgets.LayerManager)
         self.assertIsNone(self.core_map._basemap_selector)
-        # the inspector is not added by default
+        # The inspector is not added by default.
         self.assertIsNone(self.core_map._inspector)
 
     @mock.patch.object(map_widgets, "LayerEditor", create=True)
@@ -274,7 +274,7 @@ class TestMap(unittest.TestCase):
             def __init__(self, *args, **kwargs):
                 pass
 
-        with mock.patch("geemap.core.ee_tile_layers.EELeafletTileLayer", MockEELeafletTileLayer):
+        with mock.patch.object(core.ee_tile_layers, "EELeafletTileLayer", MockEELeafletTileLayer):
             self.core_map.add_layer(img, name="test_image")
             self.assertIn("test_image", self.core_map.ee_layers)
             self.assertEqual(self.core_map.ee_layers["test_image"]["ee_object"], img)
@@ -301,7 +301,7 @@ class TestMap(unittest.TestCase):
             def __init__(self, *args, **kwargs):
                 pass
 
-        with mock.patch("geemap.core.ee_tile_layers.EELeafletTileLayer", MockEELeafletTileLayer):
+        with mock.patch.object(core.ee_tile_layers, "EELeafletTileLayer", MockEELeafletTileLayer):
             self.core_map.add_layer(fake_ee.Image(), name="test_layer")
 
         control = self.core_map._add_legend(title="test_legend", layer_name="test_layer")
@@ -318,7 +318,7 @@ class TestMap(unittest.TestCase):
             def __init__(self, *args, **kwargs):
                 pass
 
-        with mock.patch("geemap.core.ee_tile_layers.EELeafletTileLayer", MockEELeafletTileLayer):
+        with mock.patch.object(core.ee_tile_layers, "EELeafletTileLayer", MockEELeafletTileLayer):
             self.core_map.add_layer(fake_ee.Image(), name="test_layer")
 
         control = self.core_map._add_colorbar(vis_params={"min": 0, "max": 1, "palette": ["red", "blue"]}, layer_name="test_layer")
