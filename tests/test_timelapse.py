@@ -297,8 +297,10 @@ class TestTimelapse(unittest.TestCase):
             mock_ee.FeatureCollection = fake_ee.FeatureCollection
             mock_ee.Feature = fake_ee.Feature
 
-            with mock.patch("geemap.timelapse.ee_to_geojson") as mock_ee_to_geojson, \
-                 mock.patch("geemap.timelapse.adjust_longitude") as mock_adjust_longitude:
+            with (
+                mock.patch("geemap.timelapse.ee_to_geojson") as mock_ee_to_geojson,
+                mock.patch("geemap.timelapse.adjust_longitude") as mock_adjust_longitude
+            ):
 
                 mock_ee_to_geojson.return_value = {"type": "Point", "coordinates": [0, 0]}
                 mock_adjust_longitude.return_value = {"type": "Point", "coordinates": [0, 0]}
