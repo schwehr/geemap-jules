@@ -233,7 +233,7 @@ class TestML(unittest.TestCase):
         # Create a tree structured specifically to hit the specific branch coverage
         # for left/right nodes being leaves (lines 211-215, 227-231).
 
-        # Left leaf tree
+        # Left leaf tree.
         X1 = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
         y1 = np.array([0, 0, 1, 0])
         clf1 = sklearn.tree.DecisionTreeClassifier(random_state=42)
@@ -241,7 +241,7 @@ class TestML(unittest.TestCase):
         tree_str1 = ml.tree_to_string(clf1, feature_names=["f1", "f2"], output_mode="CLASSIFICATION")
         self.assertIsInstance(tree_str1, str)
 
-        # Right leaf tree
+        # Right leaf tree.
         X2 = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
         y2 = np.array([0, 1, 0, 0])
         clf2 = sklearn.tree.DecisionTreeClassifier(random_state=42)
