@@ -231,7 +231,7 @@ class TestTimelapse(unittest.TestCase):
 
                 fake_col = fake_ee.ImageCollection([fake_img])
 
-                # Bad collection type
+                # Bad collection type.
                 with self.assertRaises(Exception):
                     timelapse.add_overlay(fake_img, "countries")
 
