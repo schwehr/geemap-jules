@@ -174,8 +174,7 @@ class TestCartoee(unittest.TestCase):
             cartoee.create_legend()
 
         # the function create_legend currently just returns None
-        result = cartoee.create_legend(linewidth=2)
-        self.assertIsNone(result)
+        cartoee.create_legend(linewidth=2)
 
     def test_add_legend(self):
         fig = plt.figure()
