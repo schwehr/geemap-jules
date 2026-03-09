@@ -963,7 +963,7 @@ class TestLayerEditor(unittest.TestCase):
         widget = map_widgets.LayerEditor(
             self._fake_map, self._fake_layer_dict(ee.Image())
         )
-        # Custom stretch returns None
+        # Custom stretch returns None.
         event = {"id": "band-stats", "type": "calculate"}
         detail = {"bands": ["B1"], "stretch": "custom"}
         self.assertIsNone(widget._calculate_band_stats(detail))
@@ -986,7 +986,7 @@ class TestLayerEditor(unittest.TestCase):
             minmax_mock.assert_called_once()
             self.assertEqual(minmax_mock.call_args[1]["sigma"], 2)
 
-    @mock.patch("geemap.map_widgets.pyplot.subplots")
+    @mock.patch.object(map_widgets.pyplot, "subplots")
     def test_render_colorbar(self, subplots_mock):
         """Tests rendering of a colorbar."""
         fig_mock = mock.MagicMock()
@@ -997,11 +997,11 @@ class TestLayerEditor(unittest.TestCase):
             self._fake_map, self._fake_layer_dict(ee.Image())
         )
 
-        # Test short list
+        # Test short list.
         widget._render_colorbar(["#ff0000"], 0, 1)
         self.assertEqual(list(widget.children), [])
 
-        # Test valid list
+        # Test valid list.
         with mock.patch("matplotlib.colors.LinearSegmentedColormap.from_list") as from_list_mock, \
              mock.patch("matplotlib.colors.Normalize") as norm_mock, \
              mock.patch("matplotlib.colorbar.ColorbarBase") as colorbar_mock:
@@ -1019,20 +1019,20 @@ class TestLayerEditor(unittest.TestCase):
         )
         widget._render_colorbar = mock.MagicMock()
 
-        # Custom palette
+        # Custom palette.
         detail = {"colormap": "Custom", "palette": "#ff0000,#00ff00", "bandMin": 0.0, "bandMax": 1.0}
         res = widget._calculate_palette(detail)
         self.assertEqual(res, {"palette": "#ff0000,#00ff00"})
         widget._render_colorbar.assert_called_once_with(["#ff0000", "#00ff00"], 0.0, 1.0)
 
-        # Named palette
+        # Named palette.
         widget._render_colorbar.reset_mock()
         detail = {"colormap": "viridis", "classes": "3"}
-        with mock.patch("geemap.map_widgets.pyplot.get_cmap") as get_cmap_mock:
+        with mock.patch.object(map_widgets.pyplot, "get_cmap") as get_cmap_mock:
             cmap_mock = mock.MagicMock()
             cmap_mock.N = 3
             # We must return different mock values when it's called with an index
-            # Mock it to return simple tuples to keep rgb2hex happy
+            # Mock it to return simple tuples to keep rgb2hex happy.
             cmap_mock.side_effect = [(0, 0, 0, 1), (0.5, 0.5, 0.5, 1), (1, 1, 1, 1)]
             get_cmap_mock.return_value = cmap_mock
 
@@ -1041,7 +1041,7 @@ class TestLayerEditor(unittest.TestCase):
             self.assertIn("palette", res)
             widget._render_colorbar.assert_called_once()
 
-    @mock.patch("geemap.coreutils.create_code_cell")
+    @mock.patch.object(coreutils, "create_code_cell")
     def test_on_import_click(self, create_code_cell_mock):
         """Tests the import click event handlers."""
         # Raster
@@ -1061,11 +1061,11 @@ class TestLayerEditor(unittest.TestCase):
         self.assertIn("style = ", create_code_cell_mock.call_args[0][0])
         self.assertIn("'color': 'ff00007f'", create_code_cell_mock.call_args[0][0]) # 0.5 * 255 = 127 = 7f
 
-    @mock.patch("tests.fake_map.FakeMap.add_layer")
-    @mock.patch("tests.fake_map.FakeMap.remove_layer")
+    @mock.patch.object(fake_map.FakeMap, "add_layer")
+    @mock.patch.object(fake_map.FakeMap, "remove_layer")
     def test_on_apply_click_vector(self, remove_mock, add_layer_mock):
         """Tests apply vector changes."""
-        # Style by attribute False
+        # Style by attribute False.
         widget = map_widgets.LayerEditor(
             self._fake_map, self._fake_layer_dict(ee.FeatureCollection([]))
         )
@@ -1169,13 +1169,10 @@ class TestLayerEditor(unittest.TestCase):
         widget._calculate_palette.assert_called_once()
         widget.send.assert_called_once_with({"type": "calculate", "id": "palette", "response": {"palette": "res"}})
 
-if __name__ == "__main__":
-    unittest.main()
-
 class TestSearchBar(unittest.TestCase):
     """Tests for the SearchBar class in the `map_widgets` module."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
         self._fake_map = fake_map.FakeMap()
         # Mock the missing attributes for FakeMap
