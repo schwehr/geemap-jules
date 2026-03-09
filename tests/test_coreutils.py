@@ -188,7 +188,7 @@ class TestHelpers(unittest.TestCase):
 
     def test_in_colab_shell_false(self):
         """Tests in_colab_shell."""
-        # Note: sys.modules contains many builtins, we just ensure 'google.colab' is not in it for this test case
+        # Note: sys.modules contains many builtins, we just ensure 'google.colab' is not in it for this test case.
         with mock.patch.dict("sys.modules"):
             sys.modules.pop("google.colab", None)
             self.assertFalse(coreutils.in_colab_shell())
