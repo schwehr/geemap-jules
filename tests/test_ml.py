@@ -174,8 +174,8 @@ class TestML(unittest.TestCase):
         y = np.array([0, 1])
         clf = sklearn.tree.DecisionTreeClassifier(max_depth=2, random_state=42)
         clf.fit(X, y)
-        # Manually mess up the shape of raw_vals via mocking the shape
-        with mock.patch('numpy.squeeze') as mock_squeeze:
+        # Manually mess up the shape of raw_vals via mocking the shape.
+        with mock.patch.object(np, 'squeeze') as mock_squeeze:
             mock_arr = mock.MagicMock()
             mock_arr.ndim = 3
             mock_squeeze.return_value = mock_arr
