@@ -13,9 +13,9 @@ from geemap import timelapse
 class TestTimelapse(unittest.TestCase):
     @mock.patch.object(os.path, "exists")
     @mock.patch.object(shutil, "which")
-    @mock.patch("subprocess.run")
+    @mock.patch.object(timelapse, "subprocess")
     @mock.patch.object(timelapse.Image, "open")
-    def test_gif_to_mp4(self, mock_image_open, mock_run, mock_which, mock_exists):
+    def test_gif_to_mp4(self, mock_image_open, mock_subprocess, mock_which, mock_exists):
         mock_exists.return_value = True
         mock_which.return_value = True
 
@@ -24,19 +24,19 @@ class TestTimelapse(unittest.TestCase):
         mock_image_open.return_value = mock_img
 
         timelapse.gif_to_mp4("in.gif", "out.mp4")
-        mock_run.assert_called()
-        self.assertIn("ffmpeg", mock_run.call_args[0][0])
+        mock_subprocess.run.assert_called()
+        self.assertIn("ffmpeg", mock_subprocess.run.call_args[0][0])
 
     @mock.patch.object(os.path, "exists")
     @mock.patch.object(shutil, "which")
-    @mock.patch("subprocess.run")
-    @mock.patch.object(timelapse, "open", create=True)
-    def test_merge_gifs(self, mock_open, mock_run, mock_which, mock_exists):
+    @mock.patch.object(timelapse, "subprocess")
+    @mock.patch("builtins.open", new_callable=mock.mock_open)
+    def test_merge_gifs(self, mock_open, mock_subprocess, mock_which, mock_exists):
         mock_exists.return_value = True
         mock_which.return_value = True
         timelapse.merge_gifs(["in1.gif", "in2.gif"], "out.gif")
-        mock_run.assert_called_once()
-        self.assertIn("gifsicle", mock_run.call_args[0][0])
+        mock_subprocess.run.assert_called_once()
+        self.assertIn("gifsicle", mock_subprocess.run.call_args[0][0])
 
     @mock.patch.object(os.path, "exists")
     @mock.patch.object(shutil, "which")
