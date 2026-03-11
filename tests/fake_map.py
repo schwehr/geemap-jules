@@ -37,7 +37,7 @@ class FakeMap:
             "remove",
             "_var_name",
             "_add_colorbar",
-            "_add_legend"
+            "_add_legend",
         ]
 
     def __setattr__(self, k, v):

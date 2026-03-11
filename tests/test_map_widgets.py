@@ -971,7 +971,7 @@ class TestLayerEditor(unittest.TestCase):
 
         # Percent stretch
         detail = {"bands": ["B1"], "stretch": "percent (98%)"}
-        with mock.patch.object(widget._ee_layer, 'calculate_vis_minmax') as minmax_mock:
+        with mock.patch.object(widget._ee_layer, "calculate_vis_minmax") as minmax_mock:
             minmax_mock.return_value = (0, 100)
             result = widget._calculate_band_stats(detail)
             self.assertEqual(result, {"stretch": "percent (98%)", "min": 0, "max": 100})
@@ -980,7 +980,7 @@ class TestLayerEditor(unittest.TestCase):
 
         # Sigma stretch
         detail = {"bands": ["B1"], "stretch": "sigma (2)"}
-        with mock.patch.object(widget._ee_layer, 'calculate_vis_minmax') as minmax_mock:
+        with mock.patch.object(widget._ee_layer, "calculate_vis_minmax") as minmax_mock:
             minmax_mock.return_value = (10, 20)
             result = widget._calculate_band_stats(detail)
             self.assertEqual(result, {"stretch": "sigma (2)", "min": 10, "max": 20})
@@ -1004,13 +1004,17 @@ class TestLayerEditor(unittest.TestCase):
 
         # Test valid list.
         with (
-             mock.patch("matplotlib.colors.LinearSegmentedColormap.from_list") as from_list_mock,
-             mock.patch("matplotlib.colors.Normalize") as norm_mock,
-             mock.patch("matplotlib.colorbar.ColorbarBase") as colorbar_mock
+            mock.patch(
+                "matplotlib.colors.LinearSegmentedColormap.from_list"
+            ) as from_list_mock,
+            mock.patch("matplotlib.colors.Normalize") as norm_mock,
+            mock.patch("matplotlib.colorbar.ColorbarBase") as colorbar_mock,
         ):
 
             widget._render_colorbar(["#ff0000", "#00ff00"], 0, 1)
-            from_list_mock.assert_called_once_with("custom", ["#ff0000", "#00ff00"], N=256)
+            from_list_mock.assert_called_once_with(
+                "custom", ["#ff0000", "#00ff00"], N=256
+            )
             norm_mock.assert_called_once_with(vmin=0, vmax=1)
             colorbar_mock.assert_called_once()
             self.assertEqual(len(widget.children), 1)
@@ -1023,10 +1027,17 @@ class TestLayerEditor(unittest.TestCase):
         widget._render_colorbar = mock.MagicMock()
 
         # Custom palette.
-        detail = {"colormap": "Custom", "palette": "#ff0000,#00ff00", "bandMin": 0.0, "bandMax": 1.0}
+        detail = {
+            "colormap": "Custom",
+            "palette": "#ff0000,#00ff00",
+            "bandMin": 0.0,
+            "bandMax": 1.0,
+        }
         res = widget._calculate_palette(detail)
         self.assertEqual(res, {"palette": "#ff0000,#00ff00"})
-        widget._render_colorbar.assert_called_once_with(["#ff0000", "#00ff00"], 0.0, 1.0)
+        widget._render_colorbar.assert_called_once_with(
+            ["#ff0000", "#00ff00"], 0.0, 1.0
+        )
 
         # Named palette.
         widget._render_colorbar.reset_mock()
@@ -1052,17 +1063,23 @@ class TestLayerEditor(unittest.TestCase):
             self._fake_map, self._fake_layer_dict(ee.Image())
         )
         widget._on_import_click_raster({"opacity": 0.5, "min": 0, "max": 1})
-        create_code_cell_mock.assert_called_once_with("vis_params = {'min': 0, 'max': 1}")
+        create_code_cell_mock.assert_called_once_with(
+            "vis_params = {'min': 0, 'max': 1}"
+        )
 
         # Vector
         create_code_cell_mock.reset_mock()
         widget = map_widgets.LayerEditor(
             self._fake_map, self._fake_layer_dict(ee.FeatureCollection([]))
         )
-        widget._on_import_click_vector({"color": "#ff0000", "fillColor": "#00ff00", "opacity": 0.5})
+        widget._on_import_click_vector(
+            {"color": "#ff0000", "fillColor": "#00ff00", "opacity": 0.5}
+        )
         create_code_cell_mock.assert_called_once()
         self.assertIn("style = ", create_code_cell_mock.call_args[0][0])
-        self.assertIn("'color': 'ff00007f'", create_code_cell_mock.call_args[0][0]) # 0.5 * 255 = 127 = 7f
+        self.assertIn(
+            "'color': 'ff00007f'", create_code_cell_mock.call_args[0][0]
+        )  # 0.5 * 255 = 127 = 7f
 
     @mock.patch.object(fake_map.FakeMap, "add_layer")
     @mock.patch.object(fake_map.FakeMap, "remove_layer")
@@ -1096,14 +1113,14 @@ class TestLayerEditor(unittest.TestCase):
             "color": "#000000",
             "fillColor": "#ffffff",
             "palette": ["#ff0000", "#00ff00"],
-            "field": "test_field"
+            "field": "test_field",
         }
         # Avoid full ee tracing by mocking ee methods.
         with (
-             mock.patch.object(widget._ee_object, "aggregate_array") as agg_mock,
-             mock.patch.object(widget._ee_object, "map", create=True) as map_mock,
-             mock.patch("ee.Number") as ee_num_mock,
-             mock.patch("ee.List") as ee_list_mock
+            mock.patch.object(widget._ee_object, "aggregate_array") as agg_mock,
+            mock.patch.object(widget._ee_object, "map", create=True) as map_mock,
+            mock.patch("ee.Number") as ee_num_mock,
+            mock.patch("ee.List") as ee_list_mock,
         ):
             distinct_mock = mock.MagicMock()
             sort_mock = mock.MagicMock()
@@ -1143,8 +1160,14 @@ class TestLayerEditor(unittest.TestCase):
         widget = map_widgets.LayerEditor(
             self._fake_map, self._fake_layer_dict(ee.Image())
         )
-        with mock.patch.object(widget._host_map, "_add_colorbar", create=True) as add_colorbar_mock, \
-             mock.patch.object(widget._host_map, "_add_legend", create=True) as add_legend_mock:
+        with (
+            mock.patch.object(
+                widget._host_map, "_add_colorbar", create=True
+            ) as add_colorbar_mock,
+            mock.patch.object(
+                widget._host_map, "_add_legend", create=True
+            ) as add_legend_mock,
+        ):
             # Linear legend
             widget._apply_legend({"type": "linear"}, "palette", 0, 1)
             add_colorbar_mock.assert_called_once()
@@ -1172,7 +1195,10 @@ class TestLayerEditor(unittest.TestCase):
         widget.send = mock.MagicMock()
         widget._handle_message_event(None, {"type": "calculate", "id": "palette"}, None)
         widget._calculate_palette.assert_called_once()
-        widget.send.assert_called_once_with({"type": "calculate", "id": "palette", "response": {"palette": "res"}})
+        widget.send.assert_called_once_with(
+            {"type": "calculate", "id": "palette", "response": {"palette": "res"}}
+        )
+
 
 class TestSearchBar(unittest.TestCase):
     """Tests for the SearchBar class in the `map_widgets` module."""
@@ -1183,13 +1209,13 @@ class TestSearchBar(unittest.TestCase):
         super().setUp()
         self._fake_map = fake_map.FakeMap()
         # Mock the missing attributes for FakeMap
-        setattr(fake_map.FakeMap, 'search_locations', [])
-        setattr(fake_map.FakeMap, 'search_loc_marker', None)
-        setattr(fake_map.FakeMap, 'search_loc_geom', None)
-        setattr(fake_map.FakeMap, 'search_datasets', [])
-        setattr(fake_map.FakeMap, 'center', (0, 0))
-        setattr(fake_map.FakeMap, 'remove', mock.MagicMock())
-        setattr(fake_map.FakeMap, '_var_name', 'Map')
+        setattr(fake_map.FakeMap, "search_locations", [])
+        setattr(fake_map.FakeMap, "search_loc_marker", None)
+        setattr(fake_map.FakeMap, "search_loc_geom", None)
+        setattr(fake_map.FakeMap, "search_datasets", [])
+        setattr(fake_map.FakeMap, "center", (0, 0))
+        setattr(fake_map.FakeMap, "remove", mock.MagicMock())
+        setattr(fake_map.FakeMap, "_var_name", "Map")
 
         self._fake_map.search_locations = []
         self._fake_map.search_loc_marker = None
@@ -1197,7 +1223,7 @@ class TestSearchBar(unittest.TestCase):
         self._fake_map.search_datasets = []
         self._fake_map.center = (0, 0)
         self._fake_map.remove = mock.MagicMock()
-        self._fake_map._var_name = 'Map'
+        self._fake_map._var_name = "Map"
 
     def test_search_bar_init(self):
         """Tests that the SearchBar initializes correctly."""
@@ -1239,7 +1265,9 @@ class TestSearchBar(unittest.TestCase):
         location_model = json.loads(widget.location_model)
         self.assertEqual(location_model["results"], [])
         self.assertEqual(location_model["selected"], "")
-        self.assertEqual(location_model["additional_html"], "No results could be found.")
+        self.assertEqual(
+            location_model["additional_html"], "No results could be found."
+        )
 
     @mock.patch.object(map_widgets.ee.Geometry, "Point")
     def test_set_selected_location(self, ee_point_mock):
@@ -1275,7 +1303,7 @@ class TestSearchBar(unittest.TestCase):
 
         # Test invalid location.
         widget._set_selected_location("Non-existent Address")
-        self.assertEqual(self._fake_map.center, (50.0, 60.0)) # Unchanged
+        self.assertEqual(self._fake_map.center, (50.0, 60.0))  # Unchanged
 
     @mock.patch.object(common, "geocode")
     @mock.patch.object(common, "latlon_from_text")
@@ -1316,7 +1344,9 @@ class TestSearchBar(unittest.TestCase):
         location_model = json.loads(widget.location_model)
         self.assertEqual(location_model["results"], [])
         self.assertEqual(location_model["selected"], "")
-        self.assertEqual(location_model["additional_html"], "No results could be found.")
+        self.assertEqual(
+            location_model["additional_html"], "No results could be found."
+        )
 
     @mock.patch.object(common, "latlon_from_text")
     def test_search_lat_lon_invalid(self, latlon_from_text_mock):
@@ -1329,7 +1359,10 @@ class TestSearchBar(unittest.TestCase):
         location_model = json.loads(widget.location_model)
         self.assertEqual(location_model["results"], [])
         self.assertEqual(location_model["selected"], "")
-        self.assertIn("The lat-lon coordinates should be numbers only", location_model["additional_html"])
+        self.assertIn(
+            "The lat-lon coordinates should be numbers only",
+            location_model["additional_html"],
+        )
 
     @mock.patch.object(common, "ee_data_html")
     @mock.patch.object(common, "search_ee_data")
@@ -1361,7 +1394,11 @@ class TestSearchBar(unittest.TestCase):
     @mock.patch.object(common, "ee_data_html")
     def test_select_dataset(self, ee_data_html_mock):
         """Tests selecting a searched Earth Engine dataset."""
-        mock_dataset = {"title": "Selected Dataset", "id": "test/selected", "type": "image"}
+        mock_dataset = {
+            "title": "Selected Dataset",
+            "id": "test/selected",
+            "type": "image",
+        }
         self._fake_map.search_datasets = [mock_dataset]
         ee_data_html_mock.return_value = "<p>Selected Info</p>"
 
@@ -1375,7 +1412,9 @@ class TestSearchBar(unittest.TestCase):
         # Test non-existent dataset
         widget._select_dataset("Non-existent")
         dataset_model_2 = json.loads(widget.dataset_model)
-        self.assertEqual(dataset_model_2["additional_html"], "<p>Selected Info</p>") # Unchanged
+        self.assertEqual(
+            dataset_model_2["additional_html"], "<p>Selected Info</p>"
+        )  # Unchanged
 
     @mock.patch.object(coreutils, "random_string")
     def test_import_button_clicked_image(self, random_string_mock):
@@ -1388,18 +1427,24 @@ class TestSearchBar(unittest.TestCase):
         widget.host_map.search_datasets = [mock_dataset]
         dataset_model = json.loads(widget.dataset_model)
         dataset_model["selected"] = "To Import"
-        with mock.patch.object(widget, '_select_dataset'):
+        with mock.patch.object(widget, "_select_dataset"):
             widget.dataset_model = json.dumps(dataset_model)
 
         widget.import_button_clicked()
 
         updated_model = json.loads(widget.dataset_model)
-        self.assertIn("dataset_123 = ee.Image('test/import_img')", updated_model["additional_html"])
-        self.assertIn("addLayer(dataset_123, {}, 'test/import_img')", updated_model["additional_html"])
+        self.assertIn(
+            "dataset_123 = ee.Image('test/import_img')",
+            updated_model["additional_html"],
+        )
+        self.assertIn(
+            "addLayer(dataset_123, {}, 'test/import_img')",
+            updated_model["additional_html"],
+        )
 
         # Test unselected
         dataset_model["selected"] = ""
-        with mock.patch.object(widget, '_select_dataset'):
+        with mock.patch.object(widget, "_select_dataset"):
             widget.dataset_model = json.dumps(dataset_model)
         widget.import_button_clicked()
 
@@ -1414,14 +1459,20 @@ class TestSearchBar(unittest.TestCase):
         widget.host_map.search_datasets = [mock_dataset]
         dataset_model = json.loads(widget.dataset_model)
         dataset_model["selected"] = "To Import"
-        with mock.patch.object(widget, '_select_dataset'):
+        with mock.patch.object(widget, "_select_dataset"):
             widget.dataset_model = json.dumps(dataset_model)
 
         widget.import_button_clicked()
 
         updated_model = json.loads(widget.dataset_model)
-        self.assertIn("dataset_123 = ee.FeatureCollection('test/import_tbl')", updated_model["additional_html"])
-        self.assertIn("addLayer(dataset_123, {}, 'test/import_tbl')", updated_model["additional_html"])
+        self.assertIn(
+            "dataset_123 = ee.FeatureCollection('test/import_tbl')",
+            updated_model["additional_html"],
+        )
+        self.assertIn(
+            "addLayer(dataset_123, {}, 'test/import_tbl')",
+            updated_model["additional_html"],
+        )
 
     def test_observe_location_model(self):
         """Tests observing the location model traits."""
@@ -1449,7 +1500,7 @@ class TestSearchBar(unittest.TestCase):
             widget._search_lat_lon.assert_called_once_with("10, 20")
 
         # Test clear search
-        marker = ipyleaflet.Marker(location=(0,0))
+        marker = ipyleaflet.Marker(location=(0, 0))
         widget.host_map.search_loc_marker = marker
         widget.host_map.remove = mock.MagicMock()
         change = {
