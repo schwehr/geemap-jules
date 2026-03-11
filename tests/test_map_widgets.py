@@ -12,6 +12,7 @@ from matplotlib import pyplot
 from geemap import coreutils
 from geemap import legends
 from geemap import map_widgets
+from geemap import common
 from tests import fake_ee
 import json
 from tests import fake_map
@@ -1172,7 +1173,9 @@ class TestLayerEditor(unittest.TestCase):
 class TestSearchBar(unittest.TestCase):
     """Tests for the SearchBar class in the `map_widgets` module."""
 
-    def setUp(self) -> None:
+    _fake_map: fake_map.FakeMap
+
+    def setUp(self):
         super().setUp()
         self._fake_map = fake_map.FakeMap()
         # Mock the missing attributes for FakeMap
@@ -1201,7 +1204,7 @@ class TestSearchBar(unittest.TestCase):
         self.assertEqual(widget.host_map.search_loc_geom, None)
         self.assertEqual(widget.host_map.search_datasets, None)
 
-    @mock.patch("geemap.common.geocode")
+    @mock.patch.object(common, "geocode")
     def test_search_location_success(self, geocode_mock):
         """Tests searching for a valid location."""
         mock_result = mock.MagicMock()
@@ -1219,7 +1222,7 @@ class TestSearchBar(unittest.TestCase):
         location_model = json.loads(widget.location_model)
         self.assertEqual(location_model["results"], ["Test Address"])
 
-    @mock.patch("geemap.common.geocode")
+    @mock.patch.object(common, "geocode")
     def test_search_location_failure(self, geocode_mock):
         """Tests searching for an invalid location."""
         geocode_mock.return_value = None
@@ -1270,8 +1273,8 @@ class TestSearchBar(unittest.TestCase):
         widget._set_selected_location("Non-existent Address")
         self.assertEqual(self._fake_map.center, (50.0, 60.0)) # Unchanged
 
-    @mock.patch("geemap.common.geocode")
-    @mock.patch("geemap.common.latlon_from_text")
+    @mock.patch.object(common, "geocode")
+    @mock.patch.object(common, "latlon_from_text")
     @mock.patch("ee.Geometry.Point")
     def test_search_lat_lon(self, ee_point_mock, latlon_from_text_mock, geocode_mock):
         """Tests searching for a lat/lon coordinate."""
@@ -1311,7 +1314,7 @@ class TestSearchBar(unittest.TestCase):
         self.assertEqual(location_model["selected"], "")
         self.assertEqual(location_model["additional_html"], "No results could be found.")
 
-    @mock.patch("geemap.common.latlon_from_text")
+    @mock.patch.object(common, "latlon_from_text")
     def test_search_lat_lon_invalid(self, latlon_from_text_mock):
         """Tests searching for an invalid lat/lon coordinate."""
         latlon_from_text_mock.return_value = False
@@ -1324,8 +1327,8 @@ class TestSearchBar(unittest.TestCase):
         self.assertEqual(location_model["selected"], "")
         self.assertIn("The lat-lon coordinates should be numbers only", location_model["additional_html"])
 
-    @mock.patch("geemap.common.ee_data_html")
-    @mock.patch("geemap.common.search_ee_data")
+    @mock.patch.object(common, "ee_data_html")
+    @mock.patch.object(common, "search_ee_data")
     def test_search_dataset(self, search_ee_data_mock, ee_data_html_mock):
         """Tests searching for an Earth Engine dataset."""
         mock_dataset = {"title": "Dataset 1", "id": "test/dataset1", "type": "image"}
@@ -1351,7 +1354,7 @@ class TestSearchBar(unittest.TestCase):
         self.assertEqual(dataset_model["selected"], "")
         self.assertEqual(dataset_model["additional_html"], "No results found.")
 
-    @mock.patch("geemap.common.ee_data_html")
+    @mock.patch.object(common, "ee_data_html")
     def test_select_dataset(self, ee_data_html_mock):
         """Tests selecting a searched Earth Engine dataset."""
         mock_dataset = {"title": "Selected Dataset", "id": "test/selected", "type": "image"}
@@ -1370,7 +1373,7 @@ class TestSearchBar(unittest.TestCase):
         dataset_model_2 = json.loads(widget.dataset_model)
         self.assertEqual(dataset_model_2["additional_html"], "<p>Selected Info</p>") # Unchanged
 
-    @mock.patch("geemap.coreutils.random_string")
+    @mock.patch.object(coreutils, "random_string")
     def test_import_button_clicked_image(self, random_string_mock):
         """Tests the import button click for a dataset."""
         random_string_mock.return_value = "123"
@@ -1396,7 +1399,7 @@ class TestSearchBar(unittest.TestCase):
             widget.dataset_model = json.dumps(dataset_model)
         widget.import_button_clicked()
 
-    @mock.patch("geemap.coreutils.random_string")
+    @mock.patch.object(coreutils, "random_string")
     def test_import_button_clicked_table(self, random_string_mock):
         """Tests the import button click for a dataset."""
         random_string_mock.return_value = "123"
@@ -1424,7 +1427,7 @@ class TestSearchBar(unittest.TestCase):
         widget._set_selected_location = mock.MagicMock()
 
         # Test search changes (normal text)
-        with mock.patch("geemap.common.latlon_from_text", return_value=False):
+        with mock.patch.object(common, "latlon_from_text", return_value=False):
             change = {
                 "old": json.dumps({"search": "", "selected": ""}),
                 "new": json.dumps({"search": "New Query", "selected": ""}),
@@ -1433,7 +1436,7 @@ class TestSearchBar(unittest.TestCase):
             widget._search_location.assert_called_once_with("New Query")
 
         # Test search changes (lat/lon)
-        with mock.patch("geemap.common.latlon_from_text", return_value=True):
+        with mock.patch.object(common, "latlon_from_text", return_value=True):
             change = {
                 "old": json.dumps({"search": "", "selected": ""}),
                 "new": json.dumps({"search": "10, 20", "selected": ""}),
