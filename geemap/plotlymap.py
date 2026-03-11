@@ -790,7 +790,7 @@ class Map(go.FigureWidget):
             label_col: The column name of locations.
             color_col: The column name of color.
             labels: dict with column names as keys and label names as values, e.g., {"location": "Location"}. Used for mapping column names to label names in the tooltip.
-            opacity: The opacity of the layer, a float between 0 and 1. Default is 1.0.
+            opacity: The opacity of the layer, a float between 0 and 1.
             zoom: The zoom level of the map.
             color_continuous_scale: Color scale of the data, e.g., "Viridis". Reference: https://plotly.com/python/builtin-colorscales.
         """
