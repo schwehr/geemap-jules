@@ -4576,7 +4576,9 @@ def build_repo_tree(out_dir: str | None = None, name: str = "gee_repos"):
     if user_id is not None:
         URLs["Owner"] = f"https://earthengine.googlesource.com/{ee_user_id()}/default"
 
-    path_widget = ipywidgets.Text(placeholder="Enter the link to a Git repository here...")
+    path_widget = ipywidgets.Text(
+        placeholder="Enter the link to a Git repository here..."
+    )
     path_widget.layout.width = "475px"
     clone_widget = ipywidgets.Button(
         description="Clone",

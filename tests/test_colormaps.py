@@ -68,7 +68,6 @@ class ColormapsTest(unittest.TestCase):
         self.assertEqual(palette[0], "0d0887")
         self.assertEqual(palette[255], "f0f921")
 
-
     def test_get_colorbar(self):
         """Test get_colorbar."""
         from unittest.mock import patch
@@ -107,11 +106,15 @@ class ColormapsTest(unittest.TestCase):
         import matplotlib.pyplot as plt
 
         # return_fig=True, axis_off=True, show_name=True
-        fig = colormaps.plot_colormap("viridis", axis_off=True, show_name=True, return_fig=True)
+        fig = colormaps.plot_colormap(
+            "viridis", axis_off=True, show_name=True, return_fig=True
+        )
         self.assertIsNotNone(fig)
 
         # return_fig=True, axis_off=False, show_name=False
-        fig = colormaps.plot_colormap("viridis", axis_off=False, show_name=False, return_fig=True)
+        fig = colormaps.plot_colormap(
+            "viridis", axis_off=False, show_name=False, return_fig=True
+        )
         self.assertIsNotNone(fig)
 
         # return_fig=False
@@ -124,7 +127,10 @@ class ColormapsTest(unittest.TestCase):
         from unittest.mock import patch
         import matplotlib.pyplot as plt
 
-        with patch.object(colormaps, "list_colormaps") as mock_list, patch.object(plt, "show") as mock_show:
+        with (
+            patch.object(colormaps, "list_colormaps") as mock_list,
+            patch.object(plt, "show") as mock_show,
+        ):
             mock_list.return_value = ["viridis", "plasma"]
             colormaps.plot_colormaps()
             mock_show.assert_called_once()

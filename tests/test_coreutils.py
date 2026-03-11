@@ -113,6 +113,7 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(coreutils.check_cmap(["red", "blue"]), ["red", "blue"])
         self.assertEqual(coreutils.check_cmap(("red", "blue")), ("red", "blue"))
         import box
+
         self.assertEqual(coreutils.check_cmap(box.Box({"default": ["red"]})), ["red"])
         with self.assertRaises(Exception):
             coreutils.check_cmap(123)

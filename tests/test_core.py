@@ -213,6 +213,7 @@ class TestMap(unittest.TestCase):
 
         # Let's mock out the _find_widget_of_type specifically for LayerEditor so it doesn't crash on isinstance(mock)
         original_find = self.core_map._find_widget_of_type
+
         def side_effect(widget_type, return_control=False):
             if widget_type == MockLayerEditor:
                 return None
@@ -271,10 +272,13 @@ class TestMap(unittest.TestCase):
 
         class MockEELeafletTileLayer:
             EE_TYPES = (fake_ee.Image, fake_ee.ImageCollection, type(mock.MagicMock()))
+
             def __init__(self, *args, **kwargs):
                 pass
 
-        with mock.patch.object(core.ee_tile_layers, "EELeafletTileLayer", MockEELeafletTileLayer):
+        with mock.patch.object(
+            core.ee_tile_layers, "EELeafletTileLayer", MockEELeafletTileLayer
+        ):
             self.core_map.add_layer(img, name="test_image")
             self.assertIn("test_image", self.core_map.ee_layers)
             self.assertEqual(self.core_map.ee_layers["test_image"]["ee_object"], img)
@@ -296,36 +300,54 @@ class TestMap(unittest.TestCase):
 
     def test_add_legend(self):
         """Tests adding a legend."""
+
         class MockEELeafletTileLayer:
             EE_TYPES = (fake_ee.Image, fake_ee.ImageCollection, type(mock.MagicMock()))
+
             def __init__(self, *args, **kwargs):
                 pass
 
-        with mock.patch.object(core.ee_tile_layers, "EELeafletTileLayer", MockEELeafletTileLayer):
+        with mock.patch.object(
+            core.ee_tile_layers, "EELeafletTileLayer", MockEELeafletTileLayer
+        ):
             self.core_map.add_layer(fake_ee.Image(), name="test_layer")
 
-        control = self.core_map._add_legend(title="test_legend", layer_name="test_layer")
+        control = self.core_map._add_legend(
+            title="test_legend", layer_name="test_layer"
+        )
         self.assertIn("legend", self.core_map.ee_layers["test_layer"])
 
         # Test replacement.
-        control2 = self.core_map._add_legend(title="test_legend2", layer_name="test_layer")
+        control2 = self.core_map._add_legend(
+            title="test_legend2", layer_name="test_layer"
+        )
         self.assertEqual(self.core_map.ee_layers["test_layer"]["legend"], control2)
 
     def test_add_colorbar(self):
         """Tests adding a colorbar."""
+
         class MockEELeafletTileLayer:
             EE_TYPES = (fake_ee.Image, fake_ee.ImageCollection, type(mock.MagicMock()))
+
             def __init__(self, *args, **kwargs):
                 pass
 
-        with mock.patch.object(core.ee_tile_layers, "EELeafletTileLayer", MockEELeafletTileLayer):
+        with mock.patch.object(
+            core.ee_tile_layers, "EELeafletTileLayer", MockEELeafletTileLayer
+        ):
             self.core_map.add_layer(fake_ee.Image(), name="test_layer")
 
-        control = self.core_map._add_colorbar(vis_params={"min": 0, "max": 1, "palette": ["red", "blue"]}, layer_name="test_layer")
+        control = self.core_map._add_colorbar(
+            vis_params={"min": 0, "max": 1, "palette": ["red", "blue"]},
+            layer_name="test_layer",
+        )
         self.assertIn("colorbar", self.core_map.ee_layers["test_layer"])
 
         # Test replacement.
-        control2 = self.core_map._add_colorbar(vis_params={"min": 0, "max": 1, "palette": ["red", "blue"]}, layer_name="test_layer")
+        control2 = self.core_map._add_colorbar(
+            vis_params={"min": 0, "max": 1, "palette": ["red", "blue"]},
+            layer_name="test_layer",
+        )
         self.assertEqual(self.core_map.ee_layers["test_layer"]["colorbar"], control2)
 
         # Remove it.
@@ -521,7 +543,9 @@ class TestAbstractDrawControl(unittest.TestCase):
         mock_callback = mock.Mock()
 
         self._draw_control.on_geometry_create(mock_callback)
-        self._draw_control._geometry_create_dispatcher(self._draw_control, geometry=None)
+        self._draw_control._geometry_create_dispatcher(
+            self._draw_control, geometry=None
+        )
         mock_callback.assert_called_once()
 
         mock_callback.reset_mock()
@@ -531,7 +555,9 @@ class TestAbstractDrawControl(unittest.TestCase):
 
         mock_callback.reset_mock()
         self._draw_control.on_geometry_delete(mock_callback)
-        self._draw_control._geometry_delete_dispatcher(self._draw_control, geometry=None)
+        self._draw_control._geometry_delete_dispatcher(
+            self._draw_control, geometry=None
+        )
         mock_callback.assert_called_once()
 
     def test_abstract_methods(self):
@@ -539,7 +565,9 @@ class TestAbstractDrawControl(unittest.TestCase):
             core.AbstractDrawControl(self.map)
 
         # Bypass init to test other abstract methods
-        abstract_draw_control = core.AbstractDrawControl.__new__(core.AbstractDrawControl)
+        abstract_draw_control = core.AbstractDrawControl.__new__(
+            core.AbstractDrawControl
+        )
         with self.assertRaises(NotImplementedError):
             abstract_draw_control._bind_to_draw_control()
         with self.assertRaises(NotImplementedError):
@@ -683,7 +711,11 @@ class TestMapDrawControl(unittest.TestCase):
         self._draw_control.data = [self.geo_json]
 
         # Test exception catching in handle_draw
-        with mock.patch.object(self._draw_control, "_handle_geometry_created", side_effect=Exception("Test Exception")):
+        with mock.patch.object(
+            self._draw_control,
+            "_handle_geometry_created",
+            side_effect=Exception("Test Exception"),
+        ):
             with self.assertRaisesRegex(Exception, "Test Exception"):
                 # Call handle_draw which is bound to on_draw
                 # We need to trigger the draw callback
@@ -730,6 +762,7 @@ class TestMapDrawControl(unittest.TestCase):
         self._draw_control._clear_draw_control()
         self.assertEqual(self._draw_control.data, [])
         self._draw_control.clear.assert_called_once()
+
 
 class TestMapInterface(unittest.TestCase):
     """Tests for the MapInterface."""
@@ -781,6 +814,7 @@ class TestMapInterface(unittest.TestCase):
 
         with self.assertRaises(NotImplementedError):
             map_interface.remove_layer("layer")
+
 
 if __name__ == "__main__":
     unittest.main()

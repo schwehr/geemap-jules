@@ -1,4 +1,5 @@
 """Tests for the timelapse module."""
+
 import os
 import shutil
 import sys
@@ -6,12 +7,13 @@ import unittest
 from unittest import mock
 
 # To allow mock testing when ffmpeg-python is not installed.
-sys.modules['ffmpeg'] = mock.MagicMock()
+sys.modules["ffmpeg"] = mock.MagicMock()
 
 from geemap import timelapse
 from geemap import coreutils
 from tests import fake_ee
 import ee
+
 
 class TestTimelapse(unittest.TestCase):
     @mock.patch.object(os.path, "exists")
@@ -48,9 +50,12 @@ class TestTimelapse(unittest.TestCase):
 
         # the ffmpeg inside geemap.timelapse is locally imported and used inside the function.
         import ffmpeg
-        with mock.patch.object(ffmpeg, "input") as mock_input, \
-             mock.patch.object(ffmpeg, "output") as mock_output, \
-             mock.patch.object(ffmpeg, "run") as mock_run:
+
+        with (
+            mock.patch.object(ffmpeg, "input") as mock_input,
+            mock.patch.object(ffmpeg, "output") as mock_output,
+            mock.patch.object(ffmpeg, "run") as mock_run,
+        ):
 
             timelapse.reduce_gif_size("in.gif", "out.gif")
             mock_run.assert_called_once()
@@ -62,7 +67,16 @@ class TestTimelapse(unittest.TestCase):
     @mock.patch("geemap.timelapse.os.path.exists")
     @mock.patch("geemap.timelapse.os.system")
     @mock.patch("geemap.timelapse.os.remove")
-    def test_make_gif(self, mock_remove, mock_system, mock_exists, mock_is_tool, mock_image_open, mock_glob, mock_isdir):
+    def test_make_gif(
+        self,
+        mock_remove,
+        mock_system,
+        mock_exists,
+        mock_is_tool,
+        mock_image_open,
+        mock_glob,
+        mock_isdir,
+    ):
         # Test directory input.
         mock_isdir.return_value = True
         mock_glob.return_value = ["img1.jpg", "img2.jpg"]
@@ -91,7 +105,7 @@ class TestTimelapse(unittest.TestCase):
     @mock.patch("geemap.timelapse.os.makedirs")
     @mock.patch("geemap.timelapse.os.system")
     def test_gif_to_png(self, mock_system, mock_makedirs, mock_exists):
-        mock_exists.side_effect = [True, False] # in_gif exists, out_dir doesn't
+        mock_exists.side_effect = [True, False]  # in_gif exists, out_dir doesn't
 
         timelapse.gif_to_png("in.gif", "out_dir", prefix="test_", verbose=False)
         mock_makedirs.assert_called_once_with("out_dir")
@@ -107,9 +121,19 @@ class TestTimelapse(unittest.TestCase):
     @mock.patch("geemap.timelapse.os.system")
     @mock.patch("geemap.timelapse.shutil.rmtree")
     @mock.patch("geemap.timelapse.os.getcwd")
-    def test_gif_fading(self, mock_getcwd, mock_rmtree, mock_system, mock_glob, mock_chdir, mock_gif_to_png, mock_makedirs, mock_exists):
+    def test_gif_fading(
+        self,
+        mock_getcwd,
+        mock_rmtree,
+        mock_system,
+        mock_glob,
+        mock_chdir,
+        mock_gif_to_png,
+        mock_makedirs,
+        mock_exists,
+    ):
         mock_getcwd.return_value = "/current/dir"
-        mock_exists.return_value = True # For all exists checks (in_gif, temp_dir)
+        mock_exists.return_value = True  # For all exists checks (in_gif, temp_dir)
         mock_glob.return_value = ["1.png", "2.png"]
 
         timelapse.gif_fading("in.gif", "out.gif", duration=2.0, verbose=False)
@@ -125,8 +149,16 @@ class TestTimelapse(unittest.TestCase):
     @mock.patch("geemap.timelapse.ImageDraw.Draw")
     @mock.patch("geemap.timelapse.ImageSequence.Iterator")
     @mock.patch("geemap.timelapse.io.BytesIO")
-    def test_add_progress_bar_to_gif(self, mock_bytesio, mock_iterator, mock_draw, mock_open, mock_makedirs, mock_exists):
-        mock_exists.side_effect = [True, False] # in_gif exists, out_dir doesn't
+    def test_add_progress_bar_to_gif(
+        self,
+        mock_bytesio,
+        mock_iterator,
+        mock_draw,
+        mock_open,
+        mock_makedirs,
+        mock_exists,
+    ):
+        mock_exists.side_effect = [True, False]  # in_gif exists, out_dir doesn't
         mock_img = mock.MagicMock()
         mock_img.n_frames = 2
         mock_img.size = (100, 100)
@@ -151,7 +183,16 @@ class TestTimelapse(unittest.TestCase):
     @mock.patch("geemap.timelapse.ImageSequence.Iterator")
     @mock.patch("geemap.timelapse.ImageDraw.Draw")
     @mock.patch("geemap.timelapse.io.BytesIO")
-    def test_add_text_to_gif(self, mock_bytesio, mock_draw, mock_iterator, mock_open, mock_font, mock_makedirs, mock_exists):
+    def test_add_text_to_gif(
+        self,
+        mock_bytesio,
+        mock_draw,
+        mock_iterator,
+        mock_open,
+        mock_font,
+        mock_makedirs,
+        mock_exists,
+    ):
         # We need exists to return True for in_gif, True for font, False for out_dir.
         def exists_side_effect(path):
             if path == os.path.abspath("in.gif"):
@@ -161,6 +202,7 @@ class TestTimelapse(unittest.TestCase):
             if path == os.path.dirname(os.path.abspath("out.gif")):
                 return False
             return True
+
         mock_exists.side_effect = exists_side_effect
 
         mock_img = mock.MagicMock()
@@ -175,7 +217,9 @@ class TestTimelapse(unittest.TestCase):
         mock_bytes = mock.MagicMock()
         mock_bytesio.return_value = mock_bytes
 
-        timelapse.add_text_to_gif("in.gif", "out.gif", xy=("10%", "10%"), text_sequence=["A", "B"])
+        timelapse.add_text_to_gif(
+            "in.gif", "out.gif", xy=("10%", "10%"), text_sequence=["A", "B"]
+        )
 
         mock_font.assert_called()
         self.assertEqual(mock_draw.call_count, 2)
@@ -187,7 +231,16 @@ class TestTimelapse(unittest.TestCase):
     @mock.patch("geemap.timelapse.ImageDraw.Draw")
     @mock.patch("geemap.timelapse.io.BytesIO")
     @mock.patch("geemap.timelapse.has_transparency")
-    def test_add_image_to_gif(self, mock_transparency, mock_bytesio, mock_draw, mock_iterator, mock_open, mock_makedirs, mock_exists):
+    def test_add_image_to_gif(
+        self,
+        mock_transparency,
+        mock_bytesio,
+        mock_draw,
+        mock_iterator,
+        mock_open,
+        mock_makedirs,
+        mock_exists,
+    ):
         mock_exists.return_value = True
         mock_transparency.return_value = False
 
@@ -205,19 +258,23 @@ class TestTimelapse(unittest.TestCase):
         mock_frame2 = mock.MagicMock()
         mock_iterator.return_value = [mock_frame1, mock_frame2]
 
-        timelapse.add_image_to_gif("in.gif", "out.gif", "logo.png", xy=(10, 10), circle_mask=True)
+        timelapse.add_image_to_gif(
+            "in.gif", "out.gif", "logo.png", xy=(10, 10), circle_mask=True
+        )
 
         # Verify paste is called on each frame.
         mock_frame1.convert().paste.assert_called_once()
         mock_frame2.convert().paste.assert_called_once()
 
-    @mock.patch.object(coreutils, 'ee_initialize')
+    @mock.patch.object(coreutils, "ee_initialize")
     def test_add_overlay(self, mock_ee_initialize):
         # We need to mock ee.ImageCollection etc because geemap.timelapse directly checks isinstance(collection, ee.ImageCollection).
         with mock.patch("geemap.timelapse.ee") as mock_ee:
             # Must mock coreutils.geojson_to_ee if it's called.
             with mock.patch("geemap.coreutils.geojson_to_ee") as mock_geojson_to_ee:
-                mock_geojson_to_ee.return_value = fake_ee.FeatureCollection([fake_ee.Feature(fake_ee.Geometry.Point([0, 0]))])
+                mock_geojson_to_ee.return_value = fake_ee.FeatureCollection(
+                    [fake_ee.Feature(fake_ee.Geometry.Point([0, 0]))]
+                )
 
                 # Setup fake collection.
                 fake_img = mock.MagicMock()
@@ -258,16 +315,22 @@ class TestTimelapse(unittest.TestCase):
                     self.assertEqual(res_col, fake_col)
 
                     # String overlay_data - http URL.
-                    res_col2 = timelapse.add_overlay(fake_col, "http://example.com/test.geojson")
+                    res_col2 = timelapse.add_overlay(
+                        fake_col, "http://example.com/test.geojson"
+                    )
                     self.assertEqual(res_col2, fake_col)
-                    mock_geojson_to_ee.assert_called_once_with("http://example.com/test.geojson")
+                    mock_geojson_to_ee.assert_called_once_with(
+                        "http://example.com/test.geojson"
+                    )
 
                     # String overlay_data - normal asset path.
                     res_col3 = timelapse.add_overlay(fake_col, "users/test/asset")
                     self.assertEqual(res_col3, fake_col)
 
                     # FeatureCollection.
-                    fake_fc = fake_ee.FeatureCollection([fake_ee.Feature(fake_ee.Geometry.Point([0, 0]))])
+                    fake_fc = fake_ee.FeatureCollection(
+                        [fake_ee.Feature(fake_ee.Geometry.Point([0, 0]))]
+                    )
                     res_col4 = timelapse.add_overlay(fake_col, fake_fc)
                     self.assertEqual(res_col4, fake_col)
 
@@ -286,7 +349,9 @@ class TestTimelapse(unittest.TestCase):
                     fake_fc.map = mock.MagicMock(return_value=fake_fc)
 
                     # With region.
-                    res_col7 = timelapse.add_overlay(fake_col, fake_fc, region=fake_geom)
+                    res_col7 = timelapse.add_overlay(
+                        fake_col, fake_fc, region=fake_geom
+                    )
                     self.assertEqual(res_col7, fake_col)
 
                     # With region as FeatureCollection.
@@ -294,7 +359,8 @@ class TestTimelapse(unittest.TestCase):
                     self.assertEqual(res_col8, fake_col)
 
     from geemap import coreutils
-    @mock.patch.object(coreutils, 'ee_initialize')
+
+    @mock.patch.object(coreutils, "ee_initialize")
     def test_valid_roi(self, mock_ee_initialize):
         with mock.patch("geemap.timelapse.ee") as mock_ee:
             mock_ee.Geometry = fake_ee.Geometry
@@ -303,11 +369,19 @@ class TestTimelapse(unittest.TestCase):
 
             with (
                 mock.patch("geemap.timelapse.ee_to_geojson") as mock_ee_to_geojson,
-                mock.patch("geemap.timelapse.adjust_longitude") as mock_adjust_longitude
+                mock.patch(
+                    "geemap.timelapse.adjust_longitude"
+                ) as mock_adjust_longitude,
             ):
 
-                mock_ee_to_geojson.return_value = {"type": "Point", "coordinates": [0, 0]}
-                mock_adjust_longitude.return_value = {"type": "Point", "coordinates": [0, 0]}
+                mock_ee_to_geojson.return_value = {
+                    "type": "Point",
+                    "coordinates": [0, 0],
+                }
+                mock_adjust_longitude.return_value = {
+                    "type": "Point",
+                    "coordinates": [0, 0],
+                }
 
                 # Geometry format.
                 roi3 = fake_ee.Geometry.Point([0, 0])
@@ -386,24 +460,32 @@ class TestTimelapse(unittest.TestCase):
         gif_height = 1000
 
         # Test center.
-        x, y = timelapse.get_pixel_coordinates_from_geo(50, 50, roi_bounds, gif_width, gif_height)
+        x, y = timelapse.get_pixel_coordinates_from_geo(
+            50, 50, roi_bounds, gif_width, gif_height
+        )
         self.assertEqual(x, 500)
         self.assertEqual(y, 500)
 
         # Test boundaries.
-        x, y = timelapse.get_pixel_coordinates_from_geo(0, 100, roi_bounds, gif_width, gif_height)
+        x, y = timelapse.get_pixel_coordinates_from_geo(
+            0, 100, roi_bounds, gif_width, gif_height
+        )
         self.assertEqual(x, 0)
         self.assertEqual(y, 0)
 
         # Test out of bounds (should be clamped).
-        x, y = timelapse.get_pixel_coordinates_from_geo(-10, 110, roi_bounds, gif_width, gif_height)
+        x, y = timelapse.get_pixel_coordinates_from_geo(
+            -10, 110, roi_bounds, gif_width, gif_height
+        )
         self.assertEqual(x, 0)
         self.assertEqual(y, 0)
 
-        x, y = timelapse.get_pixel_coordinates_from_geo(110, -10, roi_bounds, gif_width, gif_height)
+        x, y = timelapse.get_pixel_coordinates_from_geo(
+            110, -10, roi_bounds, gif_width, gif_height
+        )
         self.assertEqual(x, 999)
         self.assertEqual(y, 999)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
