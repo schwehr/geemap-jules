@@ -1003,9 +1003,11 @@ class TestLayerEditor(unittest.TestCase):
         self.assertEqual(list(widget.children), [])
 
         # Test valid list.
-        with mock.patch("matplotlib.colors.LinearSegmentedColormap.from_list") as from_list_mock, \
-             mock.patch("matplotlib.colors.Normalize") as norm_mock, \
-             mock.patch("matplotlib.colorbar.ColorbarBase") as colorbar_mock:
+        with (
+             mock.patch("matplotlib.colors.LinearSegmentedColormap.from_list") as from_list_mock,
+             mock.patch("matplotlib.colors.Normalize") as norm_mock,
+             mock.patch("matplotlib.colorbar.ColorbarBase") as colorbar_mock
+        ):
 
             widget._render_colorbar(["#ff0000", "#00ff00"], 0, 1)
             from_list_mock.assert_called_once_with("custom", ["#ff0000", "#00ff00"], N=256)
@@ -1096,11 +1098,13 @@ class TestLayerEditor(unittest.TestCase):
             "palette": ["#ff0000", "#00ff00"],
             "field": "test_field"
         }
-        # Avoid full ee tracing by mocking ee methods
-        with mock.patch.object(widget._ee_object, "aggregate_array") as agg_mock, \
-             mock.patch.object(widget._ee_object, "map", create=True) as map_mock, \
-             mock.patch("ee.Number") as ee_num_mock, \
-             mock.patch("ee.List") as ee_list_mock:
+        # Avoid full ee tracing by mocking ee methods.
+        with (
+             mock.patch.object(widget._ee_object, "aggregate_array") as agg_mock,
+             mock.patch.object(widget._ee_object, "map", create=True) as map_mock,
+             mock.patch("ee.Number") as ee_num_mock,
+             mock.patch("ee.List") as ee_list_mock
+        ):
             distinct_mock = mock.MagicMock()
             sort_mock = mock.MagicMock()
             sort_mock.size.return_value = mock.MagicMock()
@@ -1119,20 +1123,20 @@ class TestLayerEditor(unittest.TestCase):
             self.assertEqual(add_layer_mock.call_args[0][2], "styled_layer")
 
     @mock.patch("tests.fake_map.FakeMap.add_layer")
-    def test_on_apply_click_raster(self, add_layer_mock):
+    @mock.patch.object(map_widgets.LayerEditor, "_apply_legend")
+    def test_on_apply_click_raster(self, apply_legend_mock, add_layer_mock):
         """Tests applying raster properties."""
         widget = map_widgets.LayerEditor(
             self._fake_map, self._fake_layer_dict(ee.Image())
         )
-        with mock.patch.object(widget, "_apply_legend") as apply_legend_mock:
-            detail = {"opacity": 0.8, "min": 0, "max": 1, "legend": {"type": "linear"}}
-            widget._on_apply_click_raster(detail)
+        detail = {"opacity": 0.8, "min": 0, "max": 1, "legend": {"type": "linear"}}
+        widget._on_apply_click_raster(detail)
 
-            add_layer_mock.assert_called_once_with(
-                widget._ee_object, {"min": 0, "max": 1}, widget.layer_name, True, 0.8
-            )
-            self.assertFalse(widget._ee_layer.visible)
-            apply_legend_mock.assert_called_once()
+        add_layer_mock.assert_called_once_with(
+            widget._ee_object, {"min": 0, "max": 1}, widget.layer_name, True, 0.8
+        )
+        self.assertFalse(widget._ee_layer.visible)
+        apply_legend_mock.assert_called_once()
 
     def test_apply_legend(self):
         """Tests legend application."""
@@ -1237,7 +1241,7 @@ class TestSearchBar(unittest.TestCase):
         self.assertEqual(location_model["selected"], "")
         self.assertEqual(location_model["additional_html"], "No results could be found.")
 
-    @mock.patch("ee.Geometry.Point")
+    @mock.patch.object(map_widgets.ee.Geometry, "Point")
     def test_set_selected_location(self, ee_point_mock):
         """Tests selecting a searched location."""
         mock_result = mock.MagicMock()
@@ -1248,7 +1252,7 @@ class TestSearchBar(unittest.TestCase):
         self._fake_map.search_loc_marker = None
 
         widget = map_widgets.SearchBar(self._fake_map)
-        # Ensure it's mocked
+        # Ensure it's mocked.
         widget.host_map.add = mock.MagicMock()
         widget.host_map.search_locations = [mock_result]
 
@@ -1259,7 +1263,7 @@ class TestSearchBar(unittest.TestCase):
         self.assertEqual(self._fake_map.center, (30.0, 40.0))
         widget.host_map.add.assert_called_once()
 
-        # Test update existing marker
+        # Test update existing marker.
         mock_result_2 = mock.MagicMock()
         mock_result_2.address = "Selected Address 2"
         mock_result_2.lat = 50.0
@@ -1269,13 +1273,13 @@ class TestSearchBar(unittest.TestCase):
         self.assertEqual(list(self._fake_map.search_loc_marker.location), [50.0, 60.0])
         self.assertEqual(self._fake_map.center, (50.0, 60.0))
 
-        # Test invalid location
+        # Test invalid location.
         widget._set_selected_location("Non-existent Address")
         self.assertEqual(self._fake_map.center, (50.0, 60.0)) # Unchanged
 
     @mock.patch.object(common, "geocode")
     @mock.patch.object(common, "latlon_from_text")
-    @mock.patch("ee.Geometry.Point")
+    @mock.patch.object(map_widgets.ee.Geometry, "Point")
     def test_search_lat_lon(self, ee_point_mock, latlon_from_text_mock, geocode_mock):
         """Tests searching for a lat/lon coordinate."""
         latlon_from_text_mock.return_value = (12.3, 45.6)
