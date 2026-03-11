@@ -7843,14 +7843,13 @@ def find_landsat_by_path_row(
         path_num: The WRS path number.
         row_num: the WRS row number.
     """
-    try:
-        if isinstance(landsat_col, str):  # TODO: Convert to raise ValueError.
-            landsat_col = ee.ImageCollection(landsat_col)
-            return landsat_col.filter(ee.Filter.eq("WRS_PATH", path_num)).filter(
-                ee.Filter.eq("WRS_ROW", row_num)
-            )
-    except Exception as e:
-        print(e)
+    if not isinstance(landsat_col, str):
+        raise ValueError("landsat_col must be a string.")
+
+    landsat_col = ee.ImageCollection(landsat_col)
+    return landsat_col.filter(ee.Filter.eq("WRS_PATH", path_num)).filter(
+        ee.Filter.eq("WRS_ROW", row_num)
+    )
 
 
 def str_to_num(in_str: str) -> ee.Number:
