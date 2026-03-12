@@ -1,14 +1,11 @@
 import multiprocessing
-import unittest
-import os
-import shutil
 import tempfile
-from pathlib import Path
+import pathlib
+import unittest
 from unittest import mock
 
 try:
     import numpy as np
-    import pandas as pd
     import sklearn.ensemble
     import sklearn.tree
 
@@ -130,7 +127,7 @@ class TestML(unittest.TestCase):
     def test_trees_to_csv(self):
         trees = ["tree1\n", "tree2\n"]
         with tempfile.TemporaryDirectory() as temp_dir:
-            out_csv = Path(temp_dir) / "test_trees.csv"
+            out_csv = pathlib.Path(temp_dir) / "test_trees.csv"
             ml.trees_to_csv(trees, str(out_csv))
             self.assertTrue(out_csv.exists())
 
@@ -149,7 +146,7 @@ class TestML(unittest.TestCase):
 
         trees = ["tree1", "tree2"]
         with tempfile.TemporaryDirectory() as temp_dir:
-            out_csv = Path(temp_dir) / "test_trees.csv"
+            out_csv = pathlib.Path(temp_dir) / "test_trees.csv"
             out_csv.write_text("\n".join(trees), encoding="utf-8")
 
             classifier = ml.csv_to_classifier(str(out_csv))
