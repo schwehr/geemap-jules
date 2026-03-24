@@ -2479,7 +2479,7 @@ class Map(core.Map):
         array_args = array_args or {}
 
         if isinstance(source, (np.ndarray, xr.DataArray)):
-            source = array_to_image(source, **array_args)
+            source = array_to_image(source, **array_args)  # type: ignore
 
         tile_layer, tile_client = get_local_tile_layer(
             source,

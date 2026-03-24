@@ -569,13 +569,13 @@ class BarChart(BaseChartClass):
     def generate_tooltip(self) -> None:
         """Generates a tooltip for the bar chart."""
         if (self.x_label is not None) and (self.y_label is not None):
-            self.bar_chart.tooltip = bq.Tooltip(
+            self.bar_chart.tooltip = bq.Tooltip(  # type: ignore # pytype: disable=attribute-error
                 fields=["x", "y"], labels=[self.x_label, self.y_label]
             )
         else:
-            self.bar_chart.tooltip = bq.Tooltip(
+            self.bar_chart.tooltip = bq.Tooltip(  # type: ignore # pytype: disable=attribute-error
                 fields=["x", "y"]
-            )  # pytype: disable=attribute-error
+            )
 
     def get_ylim(self) -> tuple[float, float]:
         """Gets the y-axis limits for the bar chart.

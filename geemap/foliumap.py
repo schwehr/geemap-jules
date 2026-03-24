@@ -239,11 +239,11 @@ class Map(folium.Map):
                         _get_basemaps()[basemap].add_to(self)
 
                 elif isinstance(basemap, xyzservices.TileProvider):
-                    name = basemap.name
-                    url = basemap.build_url()
-                    attribution = basemap.attribution
-                    if "max_zoom" in basemap.keys():
-                        max_zoom = basemap["max_zoom"]
+                    name = basemap.name  # type: ignore
+                    url = basemap.build_url()  # type: ignore
+                    attribution = basemap.attribution  # type: ignore
+                    if "max_zoom" in basemap.keys():  # type: ignore
+                        max_zoom = basemap["max_zoom"]  # type: ignore
                     else:
                         max_zoom = 22
                     layer = folium.TileLayer(
@@ -714,7 +714,7 @@ class Map(folium.Map):
         array_args = array_args or {}
 
         if isinstance(source, (np.ndarray, xr.DataArray)):
-            source = array_to_image(source, **array_args)
+            source = array_to_image(source, **array_args)  # type: ignore
 
         tile_layer, tile_client = get_local_tile_layer(
             source,

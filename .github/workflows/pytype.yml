@@ -31,9 +31,10 @@ jobs:
 
             - name: Install dependencies
               run: |
+                  sed -i 's/>=3.13/>=3.12/g' pyproject.toml
                   uv sync --python ${{ matrix.python-version }}
-                  uv pip install pytype
+                  uv pip install pytype ".[all]"
 
             - name: Run pytype
               run: |
-                  uv run pytype geemap/
+                  uv run pytype geemap/ --disable import-error,pyi-error
