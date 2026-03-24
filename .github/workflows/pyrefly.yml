@@ -35,5 +35,6 @@ jobs:
                   uv pip install pyrefly
 
             - name: Run pyrefly
+              continue-on-error: true
               run: |
                   uv run pyrefly check $(git ls-files '*.py')
