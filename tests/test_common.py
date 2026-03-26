@@ -1618,5 +1618,132 @@ class CommonTest(unittest.TestCase):
         )
 
 
+class TestEEExportImageCollection(unittest.TestCase):
+    @mock.patch("geemap.common.os.path.exists")
+    @mock.patch("geemap.common.os.makedirs")
+    @mock.patch("geemap.common.ee_export_image")
+    @mock.patch("geemap.common.ee.Image")
+    @mock.patch('sys.stdout', new_callable=io.StringIO)
+    def test_export_image_collection_invalid_type(self, mock_stdout, mock_ee_image, mock_export_image, mock_makedirs, mock_exists):
+        from geemap import common
+        common.ee_export_image_collection("invalid", "out_dir")
+        self.assertIn("The ee_object must be an ee.ImageCollection.", mock_stdout.getvalue())
+
+    @mock.patch("geemap.common.os.path.exists")
+    @mock.patch("geemap.common.os.makedirs")
+    @mock.patch("geemap.common.ee_export_image")
+    @mock.patch("geemap.common.ee.Image")
+    @mock.patch('sys.stdout', new_callable=io.StringIO)
+    def test_export_image_collection_valid(self, mock_stdout, mock_ee_image, mock_export_image, mock_makedirs, mock_exists):
+        from geemap import common
+        mock_exists.return_value = False
+
+        mock_ic = mock.MagicMock(spec=ee.ImageCollection)
+        mock_ic.size.return_value.getInfo.return_value = 2
+        mock_ic.aggregate_array.return_value.getInfo.return_value = ["img1", "img2"]
+        mock_ic.toList.return_value.get.side_effect = ["item1", "item2"]
+
+        common.ee_export_image_collection(mock_ic, "out_dir", verbose=True)
+
+        mock_makedirs.assert_called_once_with("out_dir")
+        self.assertEqual(mock_export_image.call_count, 2)
+        mock_export_image.assert_any_call(
+            mock_ee_image(),
+            filename=os.path.join("out_dir", "img1.tif"),
+            scale=None,
+            crs=None,
+            crs_transform=None,
+            region=None,
+            dimensions=None,
+            file_per_band=False,
+            format="ZIPPED_GEO_TIFF",
+            unmask_value=None,
+            timeout=300,
+            proxies=None
+        )
+        self.assertIn("Total number of images: 2", mock_stdout.getvalue())
+        self.assertIn("Exporting 1/2: out_dir/img1.tif", mock_stdout.getvalue())
+
+    @mock.patch("geemap.common.os.path.exists")
+    @mock.patch("geemap.common.os.makedirs")
+    @mock.patch("geemap.common.ee_export_image")
+    @mock.patch("geemap.common.ee.Image")
+    @mock.patch('sys.stdout', new_callable=io.StringIO)
+    def test_export_image_collection_valid_with_int_filenames(self, mock_stdout, mock_ee_image, mock_export_image, mock_makedirs, mock_exists):
+        from geemap import common
+        mock_exists.return_value = True
+
+        mock_ic = mock.MagicMock(spec=ee.ImageCollection)
+        mock_ic.size.return_value.getInfo.return_value = 2
+        mock_ic.toList.return_value.get.side_effect = ["item1", "item2"]
+
+        common.ee_export_image_collection(mock_ic, "out_dir", filenames=100)
+
+        mock_makedirs.assert_not_called()
+        self.assertEqual(mock_export_image.call_count, 2)
+        mock_export_image.assert_any_call(
+            mock_ee_image(),
+            filename=os.path.join("out_dir", "100.tif"),
+            scale=None,
+            crs=None,
+            crs_transform=None,
+            region=None,
+            dimensions=None,
+            file_per_band=False,
+            format="ZIPPED_GEO_TIFF",
+            unmask_value=None,
+            timeout=300,
+            proxies=None
+        )
+        mock_export_image.assert_any_call(
+            mock_ee_image(),
+            filename=os.path.join("out_dir", "101.tif"),
+            scale=None,
+            crs=None,
+            crs_transform=None,
+            region=None,
+            dimensions=None,
+            file_per_band=False,
+            format="ZIPPED_GEO_TIFF",
+            unmask_value=None,
+            timeout=300,
+            proxies=None
+        )
+
+    @mock.patch("geemap.common.os.path.exists")
+    @mock.patch("geemap.common.os.makedirs")
+    @mock.patch("geemap.common.ee_export_image")
+    @mock.patch("geemap.common.ee.Image")
+    @mock.patch('sys.stdout', new_callable=io.StringIO)
+    def test_export_image_collection_mismatched_filenames(self, mock_stdout, mock_ee_image, mock_export_image, mock_makedirs, mock_exists):
+        from geemap import common
+        mock_exists.return_value = True
+
+        mock_ic = mock.MagicMock(spec=ee.ImageCollection)
+        mock_ic.size.return_value.getInfo.return_value = 2
+
+        common.ee_export_image_collection(mock_ic, "out_dir", filenames=["img1"])
+
+        self.assertIn("The number of filenames must be equal to the number of images.", mock_stdout.getvalue())
+        mock_export_image.assert_not_called()
+
+    @mock.patch("geemap.common.os.path.exists")
+    @mock.patch("geemap.common.os.makedirs")
+    @mock.patch("geemap.common.ee_export_image")
+    @mock.patch("geemap.common.ee.Image")
+    @mock.patch('sys.stdout', new_callable=io.StringIO)
+    def test_export_image_collection_exception_during_export(self, mock_stdout, mock_ee_image, mock_export_image, mock_makedirs, mock_exists):
+        from geemap import common
+        mock_exists.return_value = True
+
+        mock_ic = mock.MagicMock(spec=ee.ImageCollection)
+        mock_ic.size.return_value.getInfo.return_value = 2
+        mock_ic.aggregate_array.return_value.getInfo.side_effect = Exception("Test Exception")
+
+        common.ee_export_image_collection(mock_ic, "out_dir")
+
+        self.assertIn("Test Exception", mock_stdout.getvalue())
+
+
 if __name__ == "__main__":
     unittest.main()
