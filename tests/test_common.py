@@ -1619,23 +1619,21 @@ class CommonTest(unittest.TestCase):
 
 
 class TestEEExportImageCollection(unittest.TestCase):
-    @mock.patch("geemap.common.os.path.exists")
-    @mock.patch("geemap.common.os.makedirs")
-    @mock.patch("geemap.common.ee_export_image")
-    @mock.patch("geemap.common.ee.Image")
-    @mock.patch('sys.stdout', new_callable=io.StringIO)
+    @mock.patch.object(os.path, "exists")
+    @mock.patch.object(os, "makedirs")
+    @mock.patch.object(common, "ee_export_image")
+    @mock.patch.object(ee, "Image")
+    @mock.patch.object(sys, 'stdout', new_callable=io.StringIO)
     def test_export_image_collection_invalid_type(self, mock_stdout, mock_ee_image, mock_export_image, mock_makedirs, mock_exists):
-        from geemap import common
         common.ee_export_image_collection("invalid", "out_dir")
         self.assertIn("The ee_object must be an ee.ImageCollection.", mock_stdout.getvalue())
 
-    @mock.patch("geemap.common.os.path.exists")
-    @mock.patch("geemap.common.os.makedirs")
-    @mock.patch("geemap.common.ee_export_image")
-    @mock.patch("geemap.common.ee.Image")
-    @mock.patch('sys.stdout', new_callable=io.StringIO)
+    @mock.patch.object(os.path, "exists")
+    @mock.patch.object(os, "makedirs")
+    @mock.patch.object(common, "ee_export_image")
+    @mock.patch.object(ee, "Image")
+    @mock.patch.object(sys, 'stdout', new_callable=io.StringIO)
     def test_export_image_collection_valid(self, mock_stdout, mock_ee_image, mock_export_image, mock_makedirs, mock_exists):
-        from geemap import common
         mock_exists.return_value = False
 
         mock_ic = mock.MagicMock(spec=ee.ImageCollection)
@@ -1664,13 +1662,12 @@ class TestEEExportImageCollection(unittest.TestCase):
         self.assertIn("Total number of images: 2", mock_stdout.getvalue())
         self.assertIn("Exporting 1/2: out_dir/img1.tif", mock_stdout.getvalue())
 
-    @mock.patch("geemap.common.os.path.exists")
-    @mock.patch("geemap.common.os.makedirs")
-    @mock.patch("geemap.common.ee_export_image")
-    @mock.patch("geemap.common.ee.Image")
-    @mock.patch('sys.stdout', new_callable=io.StringIO)
+    @mock.patch.object(os.path, "exists")
+    @mock.patch.object(os, "makedirs")
+    @mock.patch.object(common, "ee_export_image")
+    @mock.patch.object(ee, "Image")
+    @mock.patch.object(sys, 'stdout', new_callable=io.StringIO)
     def test_export_image_collection_valid_with_int_filenames(self, mock_stdout, mock_ee_image, mock_export_image, mock_makedirs, mock_exists):
-        from geemap import common
         mock_exists.return_value = True
 
         mock_ic = mock.MagicMock(spec=ee.ImageCollection)
@@ -1710,13 +1707,12 @@ class TestEEExportImageCollection(unittest.TestCase):
             proxies=None
         )
 
-    @mock.patch("geemap.common.os.path.exists")
-    @mock.patch("geemap.common.os.makedirs")
-    @mock.patch("geemap.common.ee_export_image")
-    @mock.patch("geemap.common.ee.Image")
-    @mock.patch('sys.stdout', new_callable=io.StringIO)
+    @mock.patch.object(os.path, "exists")
+    @mock.patch.object(os, "makedirs")
+    @mock.patch.object(common, "ee_export_image")
+    @mock.patch.object(ee, "Image")
+    @mock.patch.object(sys, 'stdout', new_callable=io.StringIO)
     def test_export_image_collection_mismatched_filenames(self, mock_stdout, mock_ee_image, mock_export_image, mock_makedirs, mock_exists):
-        from geemap import common
         mock_exists.return_value = True
 
         mock_ic = mock.MagicMock(spec=ee.ImageCollection)
@@ -1727,13 +1723,12 @@ class TestEEExportImageCollection(unittest.TestCase):
         self.assertIn("The number of filenames must be equal to the number of images.", mock_stdout.getvalue())
         mock_export_image.assert_not_called()
 
-    @mock.patch("geemap.common.os.path.exists")
-    @mock.patch("geemap.common.os.makedirs")
-    @mock.patch("geemap.common.ee_export_image")
-    @mock.patch("geemap.common.ee.Image")
-    @mock.patch('sys.stdout', new_callable=io.StringIO)
+    @mock.patch.object(os.path, "exists")
+    @mock.patch.object(os, "makedirs")
+    @mock.patch.object(common, "ee_export_image")
+    @mock.patch.object(ee, "Image")
+    @mock.patch.object(sys, 'stdout', new_callable=io.StringIO)
     def test_export_image_collection_exception_during_export(self, mock_stdout, mock_ee_image, mock_export_image, mock_makedirs, mock_exists):
-        from geemap import common
         mock_exists.return_value = True
 
         mock_ic = mock.MagicMock(spec=ee.ImageCollection)
