@@ -47,7 +47,6 @@ from .plot import *
 from .timelapse import *
 from . import toolbar
 
-
 basemaps = box.Box(xyz_to_leaflet(), frozen_box=True)
 
 
@@ -3917,20 +3916,14 @@ class Map(core.Map):
                     markers.append(marker)
 
             elif isinstance(popup, list):
-                labels = []
-                for i in range(len(points)):
-                    label = ""
-                    for item in popup:
-                        label = (
-                            label
-                            + "<b>"
-                            + str(item)
-                            + "</b>"
-                            + ": "
-                            + str(df[item][i])
-                            + "<br>"
-                        )
-                    labels.append(label)
+                if not popup:
+                    labels = [""] * len(points)
+                else:
+                    cols = [df[item].tolist() for item in popup]
+                    labels = [
+                        "".join(f"<b>{k}</b>: {v}<br>" for k, v in zip(popup, row))
+                        for row in zip(*cols)
+                    ]
                 df["popup"] = labels
 
                 markers = []
@@ -4177,12 +4170,14 @@ class Map(core.Map):
                     for index, point in enumerate(points)
                 ]
             elif isinstance(popup, list):
-                labels = []
-                for i in range(len(points)):
-                    label = ""
-                    for item in popup:
-                        label = label + str(item) + ": " + str(df[item][i]) + "<br>"
-                    labels.append(label)
+                if not popup:
+                    labels = [""] * len(points)
+                else:
+                    cols = [df[item].tolist() for item in popup]
+                    labels = [
+                        "".join(f"{k}: {v}<br>" for k, v in zip(popup, row))
+                        for row in zip(*cols)
+                    ]
                 df["popup"] = labels
 
                 markers = [
