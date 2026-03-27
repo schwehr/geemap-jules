@@ -1720,11 +1720,13 @@ def install_from_github(url: str) -> None:
     pkg_name = os.path.basename(url)
     work_dir = os.getcwd()
     os.chdir(pkg_dir)
-    print(f"Installing {pkg_name}...")
-    cmd = "pip install ."
-    os.system(cmd)
-    os.chdir(work_dir)
-    print(f"{pkg_name} has been installed successfully.")
+    try:
+        print(f"Installing {pkg_name}...")
+        cmd = ["pip", "install", "."]
+        subprocess.run(cmd, check=True)
+        print(f"{pkg_name} has been installed successfully.")
+    finally:
+        os.chdir(work_dir)
 
 
 def check_git_install() -> bool:
