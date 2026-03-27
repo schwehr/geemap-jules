@@ -309,7 +309,16 @@ class CommonTest(unittest.TestCase):
     # TODO: test_check_package
     # TODO: test_install_package
     # TODO: test_clone_repo
-    # TODO: test_install_from_github
+
+    @mock.patch("os.chdir")
+    @mock.patch("geemap.common.download_from_url")
+    @mock.patch("os.makedirs")
+    @mock.patch("subprocess.run")
+    def test_install_from_github(self, mock_run, mock_makedirs, mock_download, mock_chdir):
+        url = "https://github.com/gee-community/geemap"
+        common.install_from_github(url)
+        mock_run.assert_called_with(["pip", "install", "."], check=True)
+
     # TODO: test_check_git_install
     # TODO: test_clone_github_repo
     # TODO: test_clone_google_repo
