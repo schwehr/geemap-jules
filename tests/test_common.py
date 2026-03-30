@@ -145,7 +145,7 @@ class CommonTest(unittest.TestCase):
             collection_mock.map.return_value.getDownloadURL.return_value = "http://example.com/data2.geojson"
             self.assertIsNone(common.ee_export_geojson(collection_mock, filename))
 
-    @mock.patch("zipfile.ZipFile")
+    @mock.patch.object(zipfile, "ZipFile")
     @mock.patch.object(requests, "get")
     def test_ee_export_vector(self, mock_get, mock_zip):
         """Tests ee_export_vector."""
