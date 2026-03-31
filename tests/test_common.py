@@ -10,6 +10,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+import builtins
 from unittest import mock
 import zipfile
 
@@ -2018,17 +2019,17 @@ class TestEEExportImageCollection(unittest.TestCase):
 
 
 class TestEEExportImageErrors(unittest.TestCase):
-    @mock.patch("requests.get")
+    @mock.patch.object(requests, "get")
     def test_ee_export_image_errors(self, mock_get):
         image_mock = mock.MagicMock(spec=ee.Image)
 
         # Test wrong type
-        with mock.patch("builtins.print") as mock_print:
+        with mock.patch.object(builtins, "print") as mock_print:
             common.ee_export_image("not an image", "test.tif")
             mock_print.assert_called_with("The ee_object must be an ee.Image.")
 
         # Test wrong extension
-        with mock.patch("builtins.print") as mock_print:
+        with mock.patch.object(builtins, "print") as mock_print:
             common.ee_export_image(image_mock, "test.txt")
             mock_print.assert_called_with("The filename must end with .tif")
 
@@ -2046,7 +2047,7 @@ class TestEEExportImageErrors(unittest.TestCase):
 
         # Test download URL exception
         image_mock.getDownloadURL.side_effect = Exception("Test exception")
-        with mock.patch("builtins.print") as mock_print:
+        with mock.patch.object(builtins, "print") as mock_print:
             common.ee_export_image(image_mock, "test.tif", verbose=True)
             mock_print.assert_any_call("An error occurred while downloading.")
 
@@ -2054,7 +2055,7 @@ class TestEEExportImageErrors(unittest.TestCase):
         image_mock.getDownloadURL.side_effect = None
         image_mock.getDownloadURL.return_value = "http://example.com"
         mock_get.side_effect = Exception("Request failed")
-        with mock.patch("builtins.print") as mock_print:
+        with mock.patch.object(builtins, "print") as mock_print:
             common.ee_export_image(image_mock, "test.tif")
             mock_print.assert_any_call("An error occurred while downloading.")
 
@@ -2063,7 +2064,7 @@ class TestEEExportImageErrors(unittest.TestCase):
         mock_response = mock.Mock()
         mock_response.status_code = 404
         mock_get.return_value = mock_response
-        with mock.patch("builtins.print") as mock_print:
+        with mock.patch.object(builtins, "print") as mock_print:
             common.ee_export_image(image_mock, "test.tif")
             mock_print.assert_any_call("An error occurred while downloading.")
 
