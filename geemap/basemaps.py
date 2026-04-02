@@ -501,8 +501,6 @@ def xyz_to_folium() -> dict[str, Any]:
 # ******************************************************************************#
 
 
-
-
 def xyz_to_plotly() -> dict[str, Any]:
     """Convert xyz tile services to plotly tile layers.
 

@@ -1699,34 +1699,6 @@ def clone_repo(out_dir: str = ".", unzip: bool = True) -> None:
     download_from_url(url, out_file_name=filename, out_dir=out_dir, unzip=unzip)
 
 
-def install_from_github(url: str) -> None:
-    """Install a package from a GitHub repository.
-
-    Args:
-        url: The URL of the GitHub repository.
-    """
-    download_dir = os.path.join(os.path.expanduser("~"), "Downloads")
-    if not os.path.exists(download_dir):
-        os.makedirs(download_dir)
-
-    repo_name = os.path.basename(url)
-    zip_url = os.path.join(url, "archive/master.zip")
-    filename = repo_name + "-master.zip"
-    download_from_url(
-        url=zip_url, out_file_name=filename, out_dir=download_dir, unzip=True
-    )
-
-    pkg_dir = os.path.join(download_dir, repo_name + "-master")
-    pkg_name = os.path.basename(url)
-    work_dir = os.getcwd()
-    os.chdir(pkg_dir)
-    print(f"Installing {pkg_name}...")
-    cmd = "pip install ."
-    os.system(cmd)
-    os.chdir(work_dir)
-    print(f"{pkg_name} has been installed successfully.")
-
-
 def check_git_install() -> bool:
     """Checks if Git is installed.
 
@@ -3320,35 +3292,34 @@ def create_colorbar(
     def gaussian(x: float, a: float, b: float, c: float, d: float = 0) -> float:
         return a * math.exp(-((x - b) ** 2) / (2 * c**2)) + d
 
-    # TODO: Rename map to something that doesn't clash with Python's `map`.
     def pixel(
-        x, width: float = 100, map=None, spread: float = 1
+        x, width: float = 100, color_map=None, spread: float = 1
     ) -> tuple[float, float, float]:
-        map = map or []
+        color_map = color_map or []
 
         width = float(width)
         r = sum(
             [
-                gaussian(x, p[1][0], p[0] * width, width / (spread * len(map)))
-                for p in map
+                gaussian(x, p[1][0], p[0] * width, width / (spread * len(color_map)))
+                for p in color_map
             ]
         )
         g = sum(
             [
-                gaussian(x, p[1][1], p[0] * width, width / (spread * len(map)))
-                for p in map
+                gaussian(x, p[1][1], p[0] * width, width / (spread * len(color_map)))
+                for p in color_map
             ]
         )
         b = sum(
             [
-                gaussian(x, p[1][2], p[0] * width, width / (spread * len(map)))
-                for p in map
+                gaussian(x, p[1][2], p[0] * width, width / (spread * len(color_map)))
+                for p in color_map
             ]
         )
         return min(1.0, r), min(1.0, g), min(1.0, b)
 
     for x in range(im.size[0]):
-        r, g, b = pixel(x, width=width, map=heatmap)
+        r, g, b = pixel(x, width=width, color_map=heatmap)
         r, g, b = (int(256 * v) for v in (r, g, b))
         for y in range(im.size[1]):
             ld[x, y] = r, g, b
@@ -4576,7 +4547,9 @@ def build_repo_tree(out_dir: str | None = None, name: str = "gee_repos"):
     if user_id is not None:
         URLs["Owner"] = f"https://earthengine.googlesource.com/{ee_user_id()}/default"
 
-    path_widget = ipywidgets.Text(placeholder="Enter the link to a Git repository here...")
+    path_widget = ipywidgets.Text(
+        placeholder="Enter the link to a Git repository here..."
+    )
     path_widget.layout.width = "475px"
     clone_widget = ipywidgets.Button(
         description="Clone",
@@ -7841,14 +7814,13 @@ def find_landsat_by_path_row(
         path_num: The WRS path number.
         row_num: the WRS row number.
     """
-    try:
-        if isinstance(landsat_col, str):  # TODO: Convert to raise ValueError.
-            landsat_col = ee.ImageCollection(landsat_col)
-            return landsat_col.filter(ee.Filter.eq("WRS_PATH", path_num)).filter(
-                ee.Filter.eq("WRS_ROW", row_num)
-            )
-    except Exception as e:
-        print(e)
+    if not isinstance(landsat_col, str):
+        raise ValueError("landsat_col must be a string.")
+
+    landsat_col = ee.ImageCollection(landsat_col)
+    return landsat_col.filter(ee.Filter.eq("WRS_PATH", path_num)).filter(
+        ee.Filter.eq("WRS_ROW", row_num)
+    )
 
 
 def str_to_num(in_str: str) -> ee.Number:
@@ -12289,7 +12261,8 @@ def download_ee_image_tiles(
     if column is not None:
         names = features.aggregate_array(column).getInfo()
     else:
-        names = [str(i + 1).zfill(len(str(count))) for i in range(count)]
+        count_len = len(str(count))
+        names = [str(i + 1).zfill(count_len) for i in range(count)]
 
     for i in range(count):
         region = ee.Feature(collection.get(i)).geometry()
@@ -12398,7 +12371,8 @@ def download_ee_image_tiles_parallel(
     if column is not None:
         names = features.aggregate_array(column).getInfo()
     else:
-        names = [str(i + 1).zfill(len(str(count))) for i in range(count)]
+        count_len = len(str(count))
+        names = [str(i + 1).zfill(count_len) for i in range(count)]
     collection = features.toList(count)
 
     def download_data(index: int) -> None:
@@ -14540,7 +14514,7 @@ def tif_to_jp2(
 def ee_to_geotiff(
     ee_object,
     output: str,
-    bbox=None,
+    bbox: list[float] | tuple[float, float, float, float] | None = None,
     vis_params: dict[str, Any] | None = None,
     zoom: int | None = None,
     resolution: float | None = None,
@@ -14554,7 +14528,6 @@ def ee_to_geotiff(
     Args:
         ee_object (ee.Image | ee.FeatureCollection): The Earth Engine object to download.
         output: The output path for the GeoTIFF.
-        # TODO: What is the proper type for bbox?
         bbox: The bounding box in the format [xmin, ymin, xmax, ymax]. Defaults to None,
             which is the bounding box of the Earth Engine object.
         vis_params: Visualization parameters. Defaults to {}.

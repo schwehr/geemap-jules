@@ -8,6 +8,7 @@ import folium
 import geemap
 from geemap import foliumap
 
+
 class TestFoliumap(unittest.TestCase):
 
     def test_map_init_default(self):

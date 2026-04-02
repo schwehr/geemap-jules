@@ -1,4 +1,4 @@
-name: Coverage
+name: Pyrefly
 
 on:
     push:
@@ -7,7 +7,7 @@ on:
         branches: ["main"]
 
 jobs:
-    coverage:
+    pyrefly:
         runs-on: ubuntu-latest
 
         strategy:
@@ -31,18 +31,10 @@ jobs:
 
             - name: Install dependencies
               run: |
-                  uv sync --python ${{ matrix.python-version }} --extra tests
-                  uv pip install --find-links https://girder.github.io/large_image_wheels gdal pyproj
-                  uv pip install coverage
+                  uv sync --python ${{ matrix.python-version }}
+                  uv pip install pyrefly
 
-            - name: Run coverage
+            - name: Run pyrefly
+              continue-on-error: true
               run: |
-                  uv run coverage run -m unittest discover tests/
-                  uv run coverage report
-                  uv run coverage xml
-
-            - name: Upload coverage report
-              uses: actions/upload-artifact@v7
-              with:
-                  name: coverage-report
-                  path: coverage.xml
+                  uv run pyrefly check $(git ls-files '*.py')
