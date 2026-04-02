@@ -8,7 +8,6 @@ import folium
 import geemap
 from geemap import foliumap
 
-
 class TestFoliumap(unittest.TestCase):
 
     def test_map_init_default(self):
@@ -54,7 +53,8 @@ class TestFoliumap(unittest.TestCase):
 
     def test_add_layer(self):
         m = foliumap.Map(ee_initialize=False)
-        with mock.patch("geemap.ee_tile_layers.EEFoliumTileLayer") as MockLayer:
+        from geemap import ee_tile_layers
+        with mock.patch.object(ee_tile_layers, "EEFoliumTileLayer") as MockLayer:
             mock_layer = mock.Mock()
             mock_layer.url_format = "mock_url"
             MockLayer.return_value = mock_layer

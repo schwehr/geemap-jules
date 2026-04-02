@@ -44,7 +44,6 @@ if not coreutils.in_colab_shell():
 
 def _get_basemaps():
     from .basemaps import xyz_to_folium
-
     return box.Box(xyz_to_folium(), frozen_box=True)
 
 
@@ -98,6 +97,8 @@ class Map(folium.Map):
             kwargs["Draw_export"] = False
         if "plugin_MiniMap" not in kwargs.keys():
             kwargs["plugin_MiniMap"] = False
+        # if "plugin_LayerControl" not in kwargs.keys():
+        #     kwargs["plugin_LayerControl"] = False
         if "locate_control" not in kwargs:
             kwargs["locate_control"] = False
         if "search_control" not in kwargs:

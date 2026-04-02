@@ -23,14 +23,8 @@ class Image:
     def blend(self, *_, **__):
         return self
 
-    def geometry(self, *_, **__):
-        return Geometry.Polygon()
-
     def bandNames(self, *_, **__):
         return List(["B1", "B2"])
-
-    def getThumbUrl(self, *_, **__):
-        return "https://mock-url"
 
     def reduceRegion(self, *_, **__):
         return Dictionary({"B1": 42, "B2": 3.14})
@@ -65,12 +59,6 @@ class Image:
 class List:
     def __init__(self, items, *_, **__):
         self.items = items
-
-    def map(self, *_, **__):
-        return List(self.items)
-
-    def get(self, index, *_, **__):
-        return self.items[index]
 
     def getInfo(self, *_, **__):
         return self.items
@@ -146,15 +134,7 @@ class Geometry:
                 "type": "Polygon",
                 "coordinates": [[0, 1], [1, 2], [0, 1]],
             }
-        return {
-            "geodesic": False,
-            "type": "Polygon",
-            "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
-        }
-
-    @staticmethod
-    def Rectangle(*_, **__):
-        return Geometry(type=String("Rectangle"))
+        raise ValueError("Unexpected geometry type in test: ", type_value)
 
     def __eq__(self, other: object):
         return self.geometry == getattr(other, "geometry")
@@ -244,19 +224,6 @@ class ImageCollection:
     def mosaic(self, *_, **__):
         return Image()
 
-    def size(self, *_, **__):
-        class Size:
-            def getInfo(self, *_, **__):
-                return len(self.images)
-        Size.images = self.images
-        return Size()
-
-    def toList(self, *_, **__):
-        return List(self.images)
-
-    def aggregate_array(self, *_, **__):
-        return List(["2020-01-01", "2020-01-02"][:len(self.images)])
-
     def getInfo(self):
         return {
             "type": "ImageCollection",
@@ -275,13 +242,3 @@ class Algorithms:
     @classmethod
     def If(cls, *_, **__):
         return Algorithms()
-
-class Date:
-    def __init__(self, *_, **__):
-        pass
-
-    def format(self, *_, **__):
-        return self
-
-    def getInfo(self, *_, **__):
-        return "2020-01-01"

@@ -28,17 +28,7 @@ class FakeMap:
         self.controls = []
         self.add = unittest.mock.MagicMock()
 
-        self._recognized_attrs = list(self.__dict__.keys()) + [
-            "search_locations",
-            "search_loc_marker",
-            "search_loc_geom",
-            "search_datasets",
-            "center",
-            "remove",
-            "_var_name",
-            "_add_colorbar",
-            "_add_legend",
-        ]
+        self._recognized_attrs = self.__dict__.keys()
 
     def __setattr__(self, k, v):
         if hasattr(self, "_recognized_attrs") and k not in self._recognized_attrs:

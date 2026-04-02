@@ -707,8 +707,7 @@ class Genie(ipywidgets.VBox):
         m.layout = ipywidgets.Layout(flex="1 1 auto", height=widget_height)
 
         table = ipywidgets.HBox(
-            [chat_ui, debug_output, m],
-            layout=ipywidgets.Layout(align_items="flex-start"),
+            [chat_ui, debug_output, m], layout=ipywidgets.Layout(align_items="flex-start")
         )
 
         message_widget = ipywidgets.Output()
@@ -1347,7 +1346,6 @@ class Catalog:
                 }
 
         return code_samples_dict
-
 
 # @title Embeddings classes and helper methods
 

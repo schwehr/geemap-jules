@@ -789,10 +789,10 @@ class Map(go.FigureWidget):
             gdf (GeoDataFrame): A GeoDataFrame.
             label_col: The column name of locations.
             color_col: The column name of color.
-            labels: dict with column names as keys and label names as values, e.g., {"location": "Location"}. Used for mapping column names to label names in the tooltip.
-            opacity: The opacity of the layer, a float between 0 and 1.
-            zoom: The zoom level of the map.
-            color_continuous_scale: Color scale of the data, e.g., "Viridis". Reference: https://plotly.com/python/builtin-colorscales.
+            labels: TODO
+            opacity: TODO
+            zoom: TODO
+            color_continuous_scale: TODO
         """
         import geopandas as gpd
 
