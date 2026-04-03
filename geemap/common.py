@@ -7272,7 +7272,7 @@ def image_histogram(
         title: Title for the plot. Defaults to None.
         width: Width of the plot in pixels. Defaults to None.
         height: Height of the plot in pixels. Defaults to 500.
-        plot_args: TODO.
+        plot_args: Additional arguments to be passed to plotly.express.bar(). Defaults to {}.
         layout_args: Layout arguments for the plot to be passed to fig.update_layout().
         return_df: If True, return a pandas dataframe. Defaults to False.
 
