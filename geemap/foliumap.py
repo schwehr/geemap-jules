@@ -917,7 +917,16 @@ class Map(folium.Map):
         Args:
             vis_params: Visualization parameters as a dictionary. See
                 https://developers.google.com/earth-engine/guides/image_visualization for
-                options.
+                options. The dictionary can contain the following keys:
+                * palette: The set of colors to be used for interpolation. Colors can be
+                    provided in the form: tuples of RGBA ints between 0 and 255 (e.g:
+                    (255, 255, 0) or (255, 255, 0, 255)), tuples of RGBA floats between
+                    0. and 1. (e.g., (1.,1.,0.) or (1., 1., 0., 1.)), HTML-like string (e.g.,
+                    “#ffff00), or a color name or shortcut (e.g: “y” or “yellow”).
+                * min (int, optional): The minimal value for the colormap. Values lower than
+                    min will be bound directly to colors[0]. Defaults to 0.
+                * max (float, optional): The maximal value for the colormap. Values higher
+                    than max will be bound directly to colors[-1]. Defaults to 1.0.
             index: The values corresponding to each color. It has to be sorted, and have
                 the same length as colors. If None, a regular grid between vmin and vmax
                 is created.
@@ -925,16 +934,6 @@ class Map(folium.Map):
             categorical: Whether or not to create a categorical colormap.
             step: The step to split the LinearColormap into a StepColormap.
             background_color: The background color of the colormap. Defaults to None.
-            # TODO: Fix - these are in vis_params and are not normal args:
-            colors (list): The set of colors to be used for interpolation. Colors can be
-                provided in the form: * tuples of RGBA ints between 0 and 255 (e.g:
-                (255, 255, 0) or (255, 255, 0, 255)) * tuples of RGBA floats between
-                0. and 1. (e.g., (1.,1.,0.) or (1., 1., 0., 1.)) * HTML-like string (e.g.,
-                “#ffff00) * a color name or shortcut (e.g: “y” or “yellow”)
-            vmin (int, optional): The minimal value for the colormap. Values lower than
-              vmin will be bound directly to colors[0]. Defaults to 0.
-            vmax (float, optional): The maximal value for the colormap. Values higher
-                than vmax will be bound directly to colors[-1]. Defaults to 1.0.
         """
         from branca.colormap import LinearColormap
 
