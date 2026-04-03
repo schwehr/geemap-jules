@@ -122,7 +122,13 @@ def merge_dict(dict1: dict[Any, Any], dict2: dict[Any, Any]) -> dict[Any, Any]:
         dict1: The first dictionary to merge.
         dict2: The second dictionary to merge.
     """
-    return {**dict1, **dict2}
+    res = dict1.copy()
+    for k, v in dict2.items():
+        if k in res and isinstance(res[k], dict) and isinstance(v, dict):
+            res[k] = merge_dict(res[k], v)
+        else:
+            res[k] = v
+    return res
 
 
 def get_data_dict() -> dict[str, Any]:
