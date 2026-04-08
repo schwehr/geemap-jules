@@ -2828,14 +2828,10 @@ class Map(core.Map):
             if change["new"]:
                 close_button.value = False
                 output_widget.children = [
-                    ipywidgets.VBox(
-                        [ipywidgets.HBox([toolbar_button, close_button]), html]
-                    )
+                    ipywidgets.VBox([ipywidgets.HBox([toolbar_button, close_button]), html])
                 ]
             else:
-                output_widget.children = [
-                    ipywidgets.HBox([toolbar_button, close_button])
-                ]
+                output_widget.children = [ipywidgets.HBox([toolbar_button, close_button])]
 
         toolbar_button.observe(toolbar_btn_click, "value")
 
