@@ -4460,7 +4460,11 @@ class Map(core.Map):
             if not set(variables).issubset(set(vars)):
                 raise ValueError(f"The variables must be a subset of {vars}.")
             else:
-                band_idx = [vars.index(v) + 1 for v in variables]
+                var_dict = {}
+                for i, v in enumerate(vars):
+                    if v not in var_dict:
+                        var_dict[v] = i
+                band_idx = [var_dict[v] + 1 for v in variables]
 
         self.add_raster(
             tif,
