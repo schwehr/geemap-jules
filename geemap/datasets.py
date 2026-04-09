@@ -163,3 +163,16 @@ def get_metadata(asset_id: str, source: str = "ee") -> None:
 
 
 DATA = box.Box(get_data_dict(), frozen_box=True)
+
+def get_ee_image_collection(asset_id):
+    """
+    Get an ee.ImageCollection from an Earth Engine asset ID.
+
+    Args:
+        asset_id (str): The Earth Engine asset ID.
+
+    Returns:
+        ee.ImageCollection: The Earth Engine ImageCollection.
+    """
+    import ee
+    return ee.ImageCollection(asset_id)
