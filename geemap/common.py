@@ -6655,8 +6655,7 @@ def zonal_stats_by_group(
     crs: str | None = None,
     crs_transform: list[float] | None = None,
     best_effort: bool = True,
-    # TODO: The original doc string said int, but the default is a float.
-    max_pixels: float = 1e7,
+    max_pixels: int = 10_000_000,
     tile_scale: float = 1.0,
     return_fc: bool = False,
     verbose: bool = True,
@@ -6687,7 +6686,7 @@ def zonal_stats_by_group(
             and replaces any transform already set on the projection.
         best_effort: If the polygon would contain too many pixels at the given scale,
             compute and use a larger scale which would allow the operation to succeed.
-        max_pixels: The maximum number of pixels to reduce. Defaults to 1e7.
+        max_pixels: The maximum number of pixels to reduce. Defaults to 10_000_000.
         tile_scale: A scaling factor used to reduce aggregation tile size; using a
             larger tileScale (e.g. 2 or 4) may enable computations that run out of
             memory with the default. Defaults to 1.0.
@@ -7003,7 +7002,7 @@ def image_area(img, region=None, scale=None, denominator=1.0):
             "geometry": region,
             "reducer": ee.Reducer.sum(),
             "scale": scale,
-            "maxPixels": 1e12,
+            "maxPixels": 1_000_000_000_000,
         }
     )
 
@@ -7091,7 +7090,7 @@ def image_max_value(
             "reducer": ee.Reducer.max(),
             "geometry": region,
             "scale": scale,
-            "maxPixels": 1e12,
+            "maxPixels": 1_000_000_000_000,
             "bestEffort": True,
         }
     )
@@ -7119,7 +7118,7 @@ def image_min_value(img, region=None, scale=None):
             "reducer": ee.Reducer.min(),
             "geometry": region,
             "scale": scale,
-            "maxPixels": 1e12,
+            "maxPixels": 1_000_000_000_000,
             "bestEffort": True,
         }
     )
@@ -7147,7 +7146,7 @@ def image_mean_value(img, region=None, scale=None):
             "reducer": ee.Reducer.mean(),
             "geometry": region,
             "scale": scale,
-            "maxPixels": 1e12,
+            "maxPixels": 1_000_000_000_000,
             "bestEffort": True,
         }
     )
@@ -7175,7 +7174,7 @@ def image_std_value(img, region=None, scale=None):
             "reducer": ee.Reducer.stdDev(),
             "geometry": region,
             "scale": scale,
-            "maxPixels": 1e12,
+            "maxPixels": 1_000_000_000_000,
             "bestEffort": True,
         }
     )
@@ -7203,7 +7202,7 @@ def image_sum_value(img, region=None, scale=None):
             "reducer": ee.Reducer.sum(),
             "geometry": region,
             "scale": scale,
-            "maxPixels": 1e12,
+            "maxPixels": 1_000_000_000_000,
             "bestEffort": True,
         }
     )
@@ -13041,7 +13040,7 @@ def jrc_hist_monthly_history(
                 "geometry": region,
                 "reducer": ee.Reducer.sum(),
                 "scale": scale,
-                "maxPixels": 1e12,
+                "maxPixels": 1_000_000_000_000,
                 "bestEffort": True,
             }
         )
