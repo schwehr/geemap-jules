@@ -1978,8 +1978,6 @@ class CommonTest(unittest.TestCase):
 
 
 
-if __name__ == '__main__':
-    unittest.main()
 
 class TestEEExportImageCollection(unittest.TestCase):
     @mock.patch.object(os.path, "exists")
