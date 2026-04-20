@@ -2,6 +2,7 @@
 
 import datetime
 import unittest
+import unittest.mock
 
 from click.testing import CliRunner
 
@@ -87,6 +88,119 @@ class TestMain(unittest.TestCase):
         result = self.runner.invoke(main, ["--help"])
         self.assertIn("Usage:", result.output)
 
+
+
+
+
+@unittest.skipIf(not HAS_AI, "geemap.ai dependencies are not installed")
+class TestFixEEPythonCode(unittest.TestCase):
+    def test_fix_true_false_enabled(self):
+        code = "var x = true; var y = false;"
+        fixed = ai.fix_ee_python_code(code, fix_true_false=True)
+        self.assertEqual(fixed, "var x = True; var y = False;")
+
+    def test_fix_true_false_disabled(self):
+        code = "var x = true; var y = false;"
+        fixed = ai.fix_ee_python_code(code, fix_true_false=False)
+        self.assertEqual(fixed, "var x = true; var y = false;")
+
+    def test_fix_true_false_word_boundaries(self):
+        code = "var str = 'this is true'; var not_true = true_ish;"
+        fixed = ai.fix_ee_python_code(code, fix_true_false=True)
+        self.assertEqual(fixed, "var str = 'this is True'; var not_true = true_ish;")
+
+
+
+@unittest.skipIf(not HAS_AI, "geemap.ai dependencies are not installed")
+class TestFixEEPythonCodeAI(unittest.TestCase):
+
+    @unittest.mock.patch('geemap.ai.run_ee_code')
+    def test_fix_ee_python_code_success_first_try(self, mock_run_ee_code):
+        # Setup
+        code = "import ee\nee.Image('FOO')"
+        ee_mock = unittest.mock.MagicMock()
+        geemap_mock = unittest.mock.MagicMock()
+
+        # Action
+        result = ai.fix_ee_python_code(code, ee_mock, geemap_mock)
+
+        # Assert
+        self.assertEqual(result, code)
+        mock_run_ee_code.assert_called_once_with(code, ee_mock, geemap_mock)
+
+    @unittest.mock.patch('geemap.ai.run_ee_code')
+    @unittest.mock.patch('geemap.ai.genai.GenerativeModel')
+    def test_fix_ee_python_code_success_second_try(self, mock_generative_model, mock_run_ee_code):
+        # Setup
+        broken_code = "import ee\nee.Image(FOO)"
+        fixed_code = "import ee\nee.Image('FOO')"
+        ee_mock = unittest.mock.MagicMock()
+        geemap_mock = unittest.mock.MagicMock()
+
+        # Make run_ee_code fail on first try, succeed on second try
+        mock_run_ee_code.side_effect = [Exception("SyntaxError"), None]
+
+        # Mock GenerativeModel
+        mock_model_instance = unittest.mock.MagicMock()
+        mock_response = unittest.mock.MagicMock()
+        mock_response.text = '{"code": "' + fixed_code.replace('\n', '\\n') + '", "thoughts": "Added quotes."}'
+        mock_model_instance.generate_content.return_value = mock_response
+        mock_generative_model.return_value = mock_model_instance
+
+        # Action
+        result = ai.fix_ee_python_code(broken_code, ee_mock, geemap_mock)
+
+        # Assert
+        self.assertEqual(result, fixed_code)
+        self.assertEqual(mock_run_ee_code.call_count, 2)
+        mock_run_ee_code.assert_any_call(broken_code, ee_mock, geemap_mock)
+        mock_run_ee_code.assert_any_call(fixed_code, ee_mock, geemap_mock)
+
+    @unittest.mock.patch('geemap.ai.run_ee_code')
+    @unittest.mock.patch('geemap.ai.genai.GenerativeModel')
+    def test_fix_ee_python_code_exhaust_attempts(self, mock_generative_model, mock_run_ee_code):
+        # Setup
+        broken_code = "import ee\nee.Image(FOO)"
+        ee_mock = unittest.mock.MagicMock()
+        geemap_mock = unittest.mock.MagicMock()
+
+        # Make run_ee_code always fail
+        mock_run_ee_code.side_effect = Exception("SyntaxError")
+
+        # Mock GenerativeModel
+        mock_model_instance = unittest.mock.MagicMock()
+        mock_response = unittest.mock.MagicMock()
+        mock_response.text = '{"code": "' + broken_code.replace('\n', '\\n') + '", "thoughts": "Tried fixing."}'
+        mock_model_instance.generate_content.return_value = mock_response
+        mock_generative_model.return_value = mock_model_instance
+
+        # Action & Assert
+        with self.assertRaises(Exception) as context:
+            ai.fix_ee_python_code(broken_code, ee_mock, geemap_mock)
+
+        self.assertEqual(str(context.exception), "SyntaxError")
+        self.assertEqual(mock_run_ee_code.call_count, 5)
+
+
+    def test_fix_null_enabled(self):
+        code = "var x = null;"
+        fixed = ai.fix_ee_python_code(code, fix_null=True)
+        self.assertEqual(fixed, "var x = None;")
+
+    def test_fix_null_disabled(self):
+        code = "var x = null;"
+        fixed = ai.fix_ee_python_code(code, fix_null=False)
+        self.assertEqual(fixed, "var x = null;")
+
+    def test_quote_list_content(self):
+        code = "var bands = [B4, B3, B2];"
+        fixed = ai.fix_ee_python_code(code, quote_list_content=True)
+        self.assertEqual(fixed, "var bands = ['B4', 'B3', 'B2'];")
+
+    def test_quote_list_content_disabled(self):
+        code = "var bands = [B4, B3, B2];"
+        fixed = ai.fix_ee_python_code(code, quote_list_content=False)
+        self.assertEqual(fixed, "var bands = [B4, B3, B2];")
 
 if __name__ == "__main__":
     unittest.main()
