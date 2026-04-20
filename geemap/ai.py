@@ -335,7 +335,7 @@ class Genie(ipywidgets.VBox):
                 return "No data layers loaded"
             image_temp_file = coreutils.temp_file_path(extension="jpg")
             layer_name = layers[-1]["ee_layer"].name
-            m.layer_to_image(layer_name, output=image_temp_file, scale=m.get_scale())
+            m.layer_to_image(layer_name, output=image_temp_file, scale=m.get_scale())  # type: ignore
             image = PIL.Image.open(image_temp_file)
 
             image_array = np.array(image)
@@ -394,6 +394,7 @@ class Genie(ipywidgets.VBox):
                     print(f"UNEXPECTED IMAGE RESPONSE: {e}")
                     print(image_response)
                 breakpoint()
+                return "Error analyzing image"
 
         # Function for scoring how well image analysis corresponds to the user query.
 
@@ -586,11 +587,11 @@ class Genie(ipywidgets.VBox):
                     ):
                         with debug_output:
                             command_input.description = "💤"
-                        time.sleep(sleep_duration)
+                        time.sleep(1)
                         continue
                     except ValueError as e:
                         with debug_output:
-                            print(f"Response {response} led to error: {e}")
+                            print(f"Response led to error: {e}")
                         breakpoint()
                         i = 1
 
@@ -771,7 +772,7 @@ def matches_datetime(
     wait=tenacity.wait_fixed(1),
     retry=tenacity.retry_if_exception_type(LayerException),
 )
-def run_ee_code(code: str, ee: Any, geemap_instance: Map) -> None:
+def run_ee_code(code: str, ee: Any, geemap_instance: Any) -> None:
     """Executes Earth Engine Python code within the context of a geemap instance.
 
     Args:
@@ -792,7 +793,7 @@ def run_ee_code(code: str, ee: Any, geemap_instance: Map) -> None:
     except Exception:
         # Re-raise the exception with the original traceback.
         exc_type, exc_value, exc_traceback = sys.exc_info()
-        raise exc_value.with_traceback(exc_traceback)
+        raise exc_value.with_traceback(exc_traceback)  # type: ignore # pytype: disable=attribute-error
 
 
 @dataclasses.dataclass
@@ -1047,8 +1048,8 @@ class Collection:
             code: The JavaScript code sample to set.
         """
         if not code:
-            return ""
-        js_code = self.stac_json.get("code").get("js_code")
+            return None
+        js_code = self.stac_json.get("code").get("js_code")  # type: ignore # pytype: disable=attribute-error
         self.stac_json["code"] = {"js_code": "", "py_code": code}
 
     def image_preview_url(self) -> str:
@@ -1157,8 +1158,8 @@ class CollectionList(Sequence[Collection]):
                     break
         return self.__class__(result)
 
-    def start_str(self) -> datetime.datetime:
-        return self.start().strftime("%Y-%m-%d")
+    def start_str(self) -> str:
+        return self.start().strftime("%Y-%m-%d")  # type: ignore # pytype: disable=attribute-error
 
     def sort_by_spatial_resolution(self, reverse: bool = False):
         """Sorts the collections based on their spatial resolution.
@@ -1674,7 +1675,7 @@ class CodeThoughts(typing_extensions.TypedDict):
     ),
 )
 def fix_ee_python_code(
-    code: str, ee: Any, geemap_instance: Map, model_name: str = "gemini-3-pro-preview"
+    code: str, ee: Any, geemap_instance: Any, model_name: str = "gemini-3-pro-preview"
 ) -> str:
     """Asks a model to do ee python code correction in the event of error.
 
@@ -1744,6 +1745,7 @@ def fix_ee_python_code(
             if total_attempts == max_attempts:
                 raise Exception(e)
     logging.warning(f"Failed to fix code after {max_attempts} attempts.")
+    return code
 
 
 class DatasetSearchInterface:
@@ -1755,7 +1757,7 @@ class DatasetSearchInterface:
     code_output: ipywidgets.Widget
     details_output: ipywidgets.Widget
     map_output: ipywidgets.Widget
-    geemap_instance: Map
+    geemap_instance: Any
 
     # Parent containers for controlling widget visibility.
     details_code_box: ipywidgets.Widget
