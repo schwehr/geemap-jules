@@ -12,6 +12,8 @@ try:
     HAS_AI = True
 except ImportError:
     HAS_AI = False
+    from unittest import mock
+    ai = mock.MagicMock()
 
 from geemap.cli import main
 
