@@ -2,7 +2,6 @@
 """Tests for `osm` module."""
 import unittest
 from unittest import mock
-import os
 
 from geemap import osm
 
