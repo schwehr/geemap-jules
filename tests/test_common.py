@@ -2152,5 +2152,17 @@ class TestEEExportImageErrors(unittest.TestCase):
             common.ee_export_image(image_mock, "test.tif")
             mock_print.assert_any_call("An error occurred while downloading.")
 
+class TestShowHtml(unittest.TestCase):
+    def test_show_html_from_file(self):
+        with mock.patch("os.path.exists", return_value=True):
+            with mock.patch("builtins.open", mock.mock_open(read_data="<html>test</html>")):
+                widget = common.show_html("test.html")
+                self.assertEqual(widget.value, "<html>test</html>")
+
+    def test_show_html_from_string(self):
+        with mock.patch("os.path.exists", return_value=False):
+            widget = common.show_html("<html>test string</html>")
+            self.assertEqual(widget.value, "<html>test string</html>")
+
 if __name__ == "__main__":
     unittest.main()
