@@ -596,7 +596,19 @@ class CommonTest(unittest.TestCase):
     # TODO: test_is_tool
     # TODO: test_open_image_from_url
     # TODO: test_show_image
-    # TODO: test_show_html
+
+    def test_show_html(self):
+        # Test from file
+        with mock.patch("os.path.exists", return_value=True):
+            with mock.patch("builtins.open", mock.mock_open(read_data="<html>test file content</html>")):
+                widget = common.show_html("test.html")
+                self.assertEqual(widget.value, "<html>test file content</html>")
+
+        # Test from string
+        with mock.patch("os.path.exists", return_value=False):
+            widget = common.show_html("<html>test string</html>")
+            self.assertEqual(widget.value, "<html>test string</html>")
+
     # TODO: test_has_transparency
     # TODO: test_upload_to_imgur
     # TODO: test_system_fonts
@@ -2151,18 +2163,6 @@ class TestEEExportImageErrors(unittest.TestCase):
         with mock.patch.object(builtins, "print") as mock_print:
             common.ee_export_image(image_mock, "test.tif")
             mock_print.assert_any_call("An error occurred while downloading.")
-
-class TestShowHtml(unittest.TestCase):
-    def test_show_html_from_file(self):
-        with mock.patch("os.path.exists", return_value=True):
-            with mock.patch("builtins.open", mock.mock_open(read_data="<html>test</html>")):
-                widget = common.show_html("test.html")
-                self.assertEqual(widget.value, "<html>test</html>")
-
-    def test_show_html_from_string(self):
-        with mock.patch("os.path.exists", return_value=False):
-            widget = common.show_html("<html>test string</html>")
-            self.assertEqual(widget.value, "<html>test string</html>")
 
 if __name__ == "__main__":
     unittest.main()
