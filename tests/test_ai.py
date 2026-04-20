@@ -2,7 +2,7 @@
 
 import datetime
 import unittest
-import unittest.mock
+from unittest import mock
 
 from click.testing import CliRunner
 
@@ -114,12 +114,12 @@ class TestFixEEPythonCode(unittest.TestCase):
 @unittest.skipIf(not HAS_AI, "geemap.ai dependencies are not installed")
 class TestFixEEPythonCodeAI(unittest.TestCase):
 
-    @unittest.mock.patch('geemap.ai.run_ee_code')
+    @mock.patch.object(ai, 'run_ee_code')
     def test_fix_ee_python_code_success_first_try(self, mock_run_ee_code):
         # Setup
         code = "import ee\nee.Image('FOO')"
-        ee_mock = unittest.mock.MagicMock()
-        geemap_mock = unittest.mock.MagicMock()
+        ee_mock = mock.MagicMock()
+        geemap_mock = mock.MagicMock()
 
         # Action
         result = ai.fix_ee_python_code(code, ee_mock, geemap_mock)
@@ -128,21 +128,21 @@ class TestFixEEPythonCodeAI(unittest.TestCase):
         self.assertEqual(result, code)
         mock_run_ee_code.assert_called_once_with(code, ee_mock, geemap_mock)
 
-    @unittest.mock.patch('geemap.ai.run_ee_code')
-    @unittest.mock.patch('geemap.ai.genai.GenerativeModel')
+    @mock.patch.object(ai, 'run_ee_code')
+    @mock.patch.object(ai.genai, 'GenerativeModel')
     def test_fix_ee_python_code_success_second_try(self, mock_generative_model, mock_run_ee_code):
         # Setup
         broken_code = "import ee\nee.Image(FOO)"
         fixed_code = "import ee\nee.Image('FOO')"
-        ee_mock = unittest.mock.MagicMock()
-        geemap_mock = unittest.mock.MagicMock()
+        ee_mock = mock.MagicMock()
+        geemap_mock = mock.MagicMock()
 
         # Make run_ee_code fail on first try, succeed on second try
         mock_run_ee_code.side_effect = [Exception("SyntaxError"), None]
 
         # Mock GenerativeModel
-        mock_model_instance = unittest.mock.MagicMock()
-        mock_response = unittest.mock.MagicMock()
+        mock_model_instance = mock.MagicMock()
+        mock_response = mock.MagicMock()
         mock_response.text = '{"code": "' + fixed_code.replace('\n', '\\n') + '", "thoughts": "Added quotes."}'
         mock_model_instance.generate_content.return_value = mock_response
         mock_generative_model.return_value = mock_model_instance
@@ -156,20 +156,20 @@ class TestFixEEPythonCodeAI(unittest.TestCase):
         mock_run_ee_code.assert_any_call(broken_code, ee_mock, geemap_mock)
         mock_run_ee_code.assert_any_call(fixed_code, ee_mock, geemap_mock)
 
-    @unittest.mock.patch('geemap.ai.run_ee_code')
-    @unittest.mock.patch('geemap.ai.genai.GenerativeModel')
+    @mock.patch.object(ai, 'run_ee_code')
+    @mock.patch.object(ai.genai, 'GenerativeModel')
     def test_fix_ee_python_code_exhaust_attempts(self, mock_generative_model, mock_run_ee_code):
         # Setup
         broken_code = "import ee\nee.Image(FOO)"
-        ee_mock = unittest.mock.MagicMock()
-        geemap_mock = unittest.mock.MagicMock()
+        ee_mock = mock.MagicMock()
+        geemap_mock = mock.MagicMock()
 
         # Make run_ee_code always fail
         mock_run_ee_code.side_effect = Exception("SyntaxError")
 
         # Mock GenerativeModel
-        mock_model_instance = unittest.mock.MagicMock()
-        mock_response = unittest.mock.MagicMock()
+        mock_model_instance = mock.MagicMock()
+        mock_response = mock.MagicMock()
         mock_response.text = '{"code": "' + broken_code.replace('\n', '\\n') + '", "thoughts": "Tried fixing."}'
         mock_model_instance.generate_content.return_value = mock_response
         mock_generative_model.return_value = mock_model_instance
