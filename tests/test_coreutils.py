@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Tests for `coreutils` module."""
 import json
+import google.oauth2.credentials
 import os
 import string
 import sys
@@ -248,10 +249,10 @@ class TestHelpers(unittest.TestCase):
 
 
 class TestEeInitialize(unittest.TestCase):
-    @mock.patch("geemap.coreutils.ee.Initialize")
-    @mock.patch("geemap.coreutils.ee.Authenticate")
-    @mock.patch("geemap.coreutils.ee.data.setUserAgent")
-    @mock.patch("geemap.coreutils.ee.data._get_state")
+    @mock.patch.object(coreutils.ee, "Initialize")
+    @mock.patch.object(coreutils.ee, "Authenticate")
+    @mock.patch.object(coreutils.ee.data, "setUserAgent")
+    @mock.patch.object(coreutils.ee.data, "_get_state")
     def test_ee_initialize_already_authenticated(self, mock_get_state, mock_set_user_agent, mock_authenticate, mock_initialize):
         # Setup state to have credentials
         mock_state = mock.Mock()
@@ -264,12 +265,12 @@ class TestEeInitialize(unittest.TestCase):
         mock_initialize.assert_not_called()
         mock_authenticate.assert_not_called()
 
-    @mock.patch("geemap.coreutils.ee.Initialize")
-    @mock.patch("geemap.coreutils.ee.Authenticate")
-    @mock.patch("geemap.coreutils.ee.data.setUserAgent")
-    @mock.patch("geemap.coreutils.ee.data._get_state")
-    @mock.patch("geemap.coreutils.get_env_var")
-    @mock.patch("google.oauth2.credentials.Credentials")
+    @mock.patch.object(coreutils.ee, "Initialize")
+    @mock.patch.object(coreutils.ee, "Authenticate")
+    @mock.patch.object(coreutils.ee.data, "setUserAgent")
+    @mock.patch.object(coreutils.ee.data, "_get_state")
+    @mock.patch.object(coreutils, "get_env_var")
+    @mock.patch.object(google.oauth2.credentials, "Credentials")
     def test_ee_initialize_with_ee_token(self, mock_credentials, mock_get_env_var, mock_get_state, mock_set_user_agent, mock_authenticate, mock_initialize):
         # Setup state to not have credentials
         mock_state = mock.Mock()
@@ -297,12 +298,12 @@ class TestEeInitialize(unittest.TestCase):
         mock_initialize.assert_called_once_with(credentials=mock_cred_instance, opt_url="http://test")
         mock_authenticate.assert_not_called()
 
-    @mock.patch("geemap.coreutils.ee.Initialize")
-    @mock.patch("geemap.coreutils.ee.Authenticate")
-    @mock.patch("geemap.coreutils.ee.data.setUserAgent")
-    @mock.patch("geemap.coreutils.ee.data._get_state")
-    @mock.patch("geemap.coreutils.get_env_var")
-    @mock.patch("geemap.coreutils.in_colab_shell")
+    @mock.patch.object(coreutils.ee, "Initialize")
+    @mock.patch.object(coreutils.ee, "Authenticate")
+    @mock.patch.object(coreutils.ee.data, "setUserAgent")
+    @mock.patch.object(coreutils.ee.data, "_get_state")
+    @mock.patch.object(coreutils, "get_env_var")
+    @mock.patch.object(coreutils, "in_colab_shell")
     def test_ee_initialize_in_colab(self, mock_in_colab, mock_get_env_var, mock_get_state, mock_set_user_agent, mock_authenticate, mock_initialize):
         # Setup state to not have credentials
         mock_state = mock.Mock()
@@ -327,12 +328,12 @@ class TestEeInitialize(unittest.TestCase):
         mock_authenticate.assert_called_once_with()
         mock_initialize.assert_called_once_with(project="env_proj")
 
-    @mock.patch("geemap.coreutils.ee.Initialize")
-    @mock.patch("geemap.coreutils.ee.Authenticate")
-    @mock.patch("geemap.coreutils.ee.data.setUserAgent")
-    @mock.patch("geemap.coreutils.ee.data._get_state")
-    @mock.patch("geemap.coreutils.get_env_var")
-    @mock.patch("geemap.coreutils.in_colab_shell")
+    @mock.patch.object(coreutils.ee, "Initialize")
+    @mock.patch.object(coreutils.ee, "Authenticate")
+    @mock.patch.object(coreutils.ee.data, "setUserAgent")
+    @mock.patch.object(coreutils.ee.data, "_get_state")
+    @mock.patch.object(coreutils, "get_env_var")
+    @mock.patch.object(coreutils, "in_colab_shell")
     def test_ee_initialize_default(self, mock_in_colab, mock_get_env_var, mock_get_state, mock_set_user_agent, mock_authenticate, mock_initialize):
         # Setup state to not have credentials
         mock_state = mock.Mock()
@@ -351,12 +352,12 @@ class TestEeInitialize(unittest.TestCase):
         mock_authenticate.assert_called_once_with(auth_mode="notebook")
         mock_initialize.assert_called_once_with(project=None)
 
-    @mock.patch("geemap.coreutils.ee.Initialize")
-    @mock.patch("geemap.coreutils.ee.Authenticate")
-    @mock.patch("geemap.coreutils.ee.data.setUserAgent")
-    @mock.patch("geemap.coreutils.ee.data._get_state")
-    @mock.patch("geemap.coreutils.get_env_var")
-    @mock.patch("geemap.coreutils.in_colab_shell")
+    @mock.patch.object(coreutils.ee, "Initialize")
+    @mock.patch.object(coreutils.ee, "Authenticate")
+    @mock.patch.object(coreutils.ee.data, "setUserAgent")
+    @mock.patch.object(coreutils.ee.data, "_get_state")
+    @mock.patch.object(coreutils, "get_env_var")
+    @mock.patch.object(coreutils, "in_colab_shell")
     def test_ee_initialize_with_custom_args(self, mock_in_colab, mock_get_env_var, mock_get_state, mock_set_user_agent, mock_authenticate, mock_initialize):
         # Setup state to not have credentials
         mock_state = mock.Mock()
