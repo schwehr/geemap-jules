@@ -2,6 +2,7 @@ import pathlib
 import tempfile
 import textwrap
 import unittest
+from unittest import mock
 from geemap import legends
 
 
@@ -36,6 +37,19 @@ class LegendsTest(unittest.TestCase):
 
             actual_output = out_file_path.read_text()
             self.assertEqual(expected_output, actual_output)
+
+    @mock.patch("builtins.print")
+    def test_ee_table_to_legend_no_file(self, mock_print):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmpdir = pathlib.Path(tmpdir)
+            in_table_path = tmpdir / "non_existent.txt"
+            out_file_path = tmpdir / "out_file.txt"
+
+            # Should throw FileNotFoundError because open() will still be called
+            with self.assertRaises(FileNotFoundError):
+                legends.ee_table_to_legend(str(in_table_path), str(out_file_path))
+
+            mock_print.assert_called_with("The class table does not exist.")
 
 
 if __name__ == "__main__":

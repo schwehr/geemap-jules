@@ -6,6 +6,7 @@
 # *******************************************************************************#
 
 import os
+import pathlib
 
 
 # Land Cover datasets in Earth Engine https://developers.google.com/earth-engine/datasets/tags/landcover
@@ -492,16 +493,16 @@ def ee_table_to_legend(in_table: str, out_file: str) -> None:
         in_table: The input file path (*.txt) to the Earth Engine color table.
         out_file: The output file path (*.txt) to the legend dictionary.
     """
+    in_path = pathlib.Path(in_table)
+    out_path = pathlib.Path(out_file).resolve()
 
-    if not os.path.exists(in_table):
+    if not in_path.exists():
         print("The class table does not exist.")
 
-    out_file = os.path.abspath(out_file)
-    if not os.path.exists(os.path.dirname(out_file)):
-        os.makedirs(os.path.dirname(out_file))
+    out_path.parent.mkdir(parents=True, exist_ok=True)
 
     legend_dict = {}
-    with open(in_table) as f:
+    with open(in_path) as f:
         lines = f.readlines()
         for index, line in enumerate(lines):
             if index > 0:
@@ -521,5 +522,5 @@ def ee_table_to_legend(in_table: str, out_file: str) -> None:
     out_lines[-1] = out_lines[-1].rstrip()[:-1] + "\n"
     out_lines.append("}\n")
 
-    with open(out_file, "w") as f:
+    with open(out_path, "w") as f:
         f.writelines(out_lines)
