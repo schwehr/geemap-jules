@@ -49,6 +49,15 @@ class TestPlot(unittest.TestCase):
         with self.assertRaises(ValueError):
             plot.bar_chart(data=123)
 
+    def test_bar_chart_no_descending(self):
+        fig = plot.bar_chart(
+            data=self.df.copy(),
+            x="category",
+            y="value",
+            descending=None,
+        )
+        self.assertIsInstance(fig, go.Figure)
+
     @mock.patch.object(coreutils, "github_raw_url")
     @mock.patch.object(common, "get_direct_url")
     @mock.patch.object(pd, "read_csv")
@@ -141,6 +150,57 @@ class TestPlot(unittest.TestCase):
             values="value",
             max_rows=3,
             other_label="Other Category",
+        )
+        self.assertIsInstance(fig, go.Figure)
+
+    @mock.patch.object(coreutils, "github_raw_url")
+    @mock.patch.object(common, "get_direct_url")
+    @mock.patch.object(pd, "read_csv")
+    def test_line_chart_url(
+        self, mock_read_csv, mock_get_direct_url, mock_github_raw_url
+    ):
+        mock_github_raw_url.return_value = "https://example.com/data.csv"
+        mock_get_direct_url.return_value = "https://example.com/data.csv"
+        mock_read_csv.return_value = self.df.copy()
+
+        fig = plot.line_chart(
+            data="https://example.com/data.csv",
+            x="category",
+            y="value",
+        )
+        self.assertIsInstance(fig, go.Figure)
+
+    @mock.patch.object(coreutils, "github_raw_url")
+    @mock.patch.object(common, "get_direct_url")
+    @mock.patch.object(pd, "read_csv")
+    def test_histogram_url(
+        self, mock_read_csv, mock_get_direct_url, mock_github_raw_url
+    ):
+        mock_github_raw_url.return_value = "https://example.com/data.csv"
+        mock_get_direct_url.return_value = "https://example.com/data.csv"
+        mock_read_csv.return_value = self.df.copy()
+
+        fig = plot.histogram(
+            data="https://example.com/data.csv",
+            x="value",
+            y="extra",
+        )
+        self.assertIsInstance(fig, go.Figure)
+
+    @mock.patch.object(coreutils, "github_raw_url")
+    @mock.patch.object(common, "get_direct_url")
+    @mock.patch.object(pd, "read_csv")
+    def test_pie_chart_url(
+        self, mock_read_csv, mock_get_direct_url, mock_github_raw_url
+    ):
+        mock_github_raw_url.return_value = "https://example.com/data.csv"
+        mock_get_direct_url.return_value = "https://example.com/data.csv"
+        mock_read_csv.return_value = self.df.copy()
+
+        fig = plot.pie_chart(
+            data="https://example.com/data.csv",
+            names="category",
+            values="value",
         )
         self.assertIsInstance(fig, go.Figure)
 
