@@ -87,6 +87,66 @@ class TestGeemap(unittest.TestCase):
         self.assertEqual(m.center, [0, 0])
         self.assertEqual(m.zoom, 2)
 
+    def test_add_ee_layer(self):
+        from tests import fake_ee
+
+        m = geemap.Map(ee_initialize=False)
+        img = fake_ee.Image()
+
+        class MockEELeafletTileLayer:
+            EE_TYPES = (fake_ee.Image, fake_ee.ImageCollection, type(mock.MagicMock()))
+
+            def __init__(self, *args, **kwargs):
+                self.url_format = "mock_url"
+
+        with (
+            mock.patch.object(
+                geemap.core.ee_tile_layers, "EELeafletTileLayer", MockEELeafletTileLayer
+            ),
+            mock.patch.object(geemap.geemap, "arc_add_layer") as mock_arc_add_layer,
+            mock.patch.object(geemap.geemap.ee, "Image", fake_ee.Image),
+            mock.patch.object(
+                geemap.geemap.ee, "ImageCollection", fake_ee.ImageCollection
+            ),
+        ):
+            m.add_ee_layer(img, name="test_layer")
+            self.assertIn("test_layer", m.ee_layers)
+            self.assertEqual(m.ee_layers["test_layer"]["ee_object"], img)
+            mock_arc_add_layer.assert_called_once_with(
+                "mock_url", "test_layer", True, 1.0
+            )
+
+            # Test plot dropdown
+            m._plot_dropdown_widget = mock.MagicMock()
+            m.add_ee_layer(img, name="test_layer_2")
+            self.assertIn("test_layer_2", m._plot_dropdown_widget.options)
+
+            # Update an existing layer to test `layer is not None` condition
+            m.add_ee_layer(img, name="test_layer_2")
+
+    def test_remove_ee_layer(self):
+        from tests import fake_ee
+
+        m = geemap.Map(ee_initialize=False)
+        m.ee_layers = {
+            "test_layer": {
+                "ee_object": fake_ee.Image(),
+                "ee_layer": "mock_ee_layer",
+            }
+        }
+
+        with mock.patch.object(
+            geemap.Map, "layers", new_callable=mock.PropertyMock
+        ) as mock_layers:
+            mock_layers.return_value = ["mock_ee_layer"]
+            with mock.patch.object(m, "remove_layer") as mock_remove_layer:
+                m.remove_ee_layer("test_layer")
+                self.assertNotIn("test_layer", m.ee_layers)
+                mock_remove_layer.assert_called_once_with("mock_ee_layer")
+
+                # test remove non-existent
+                m.remove_ee_layer("not_exist")
+
 
 if __name__ == "__main__":
     unittest.main()
