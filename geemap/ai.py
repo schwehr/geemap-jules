@@ -599,7 +599,6 @@ class Genie(ipywidgets.VBox):
                 # Always delay a bit to reduce the chance for rate-limiting errors.
                 time.sleep(1)
                 condition = ""
-                sleep_duration = 10
                 while True:
                     response = ""
                     try:
