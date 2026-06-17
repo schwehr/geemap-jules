@@ -1567,3 +1567,20 @@ class TestSearchBar(unittest.TestCase):
         widget.on_close = mock.MagicMock()
         widget.cleanup()
         widget.on_close.assert_called_once()
+
+class TestSetCssInCellOutput(unittest.TestCase):
+    """Tests for the _set_css_in_cell_output function."""
+
+    @mock.patch("geemap.map_widgets.display")
+    @mock.patch("geemap.map_widgets.HTML")
+    def test_set_css_in_cell_output(self, mock_html, mock_display):
+        """Tests that CSS is correctly set in the cell output."""
+        mock_html.return_value = "html_mock"
+        map_widgets._set_css_in_cell_output(None)
+        mock_html.assert_called_once()
+        html_arg = mock_html.call_args[0][0]
+        self.assertIn(".geemap-dark", html_arg)
+        mock_display.assert_called_once_with("html_mock")
+
+if __name__ == "__main__":
+    unittest.main()
