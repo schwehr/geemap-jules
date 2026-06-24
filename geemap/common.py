@@ -3327,7 +3327,7 @@ def create_colorbar(
     if add_outline:
         draw = ImageDraw.Draw(im)
         draw.rectangle(
-            [(0, 0), (width - 1, height - 1)],
+            ((0, 0), (width - 1, height - 1)),  # type: ignore
             outline=coreutils.check_color(outline_color),
         )
         del draw
@@ -11758,7 +11758,7 @@ def classify(
 
     # To accept pd.Series and np.arrays as column
     if isinstance(column, (np.ndarray, pd.Series)):
-        if column.shape[0] != df.shape[0]:
+        if column.shape[0] != df.shape[0]:  # type: ignore
             raise ValueError(
                 "The dataframe and given column have different number of rows."
             )
@@ -11767,7 +11767,7 @@ def classify(
 
             # Make sure index of a Series matches index of df
             if isinstance(values, pd.Series):
-                values = values.reindex(df.index)
+                values = values.reindex(df.index)  # type: ignore
     else:
         values = df[column]
 

@@ -521,7 +521,7 @@ def add_text_to_gif(
             draw = ImageDraw.Draw(frame)
             draw.text(xy, text[index], font=font, fill=color)
             if add_progress_bar:
-                draw.rectangle(progress_bar_shapes[index], fill=progress_bar_color)
+                draw.rectangle(progress_bar_shapes[index], fill=progress_bar_color)  # type: ignore
             del draw
 
             b = io.BytesIO()
@@ -601,7 +601,7 @@ def add_image_to_gif(
     except Exception as e:
         print(e)
 
-    logo_raw_size = logo_raw_image.size
+    logo_raw_size = logo_raw_image.size  # type: ignore
 
     ratio = max(
         logo_raw_size[0] / image_size[0],
@@ -612,7 +612,7 @@ def add_image_to_gif(
         logo_raw_size[1], image_size[1]
     )
 
-    logo_image = logo_raw_image.convert("RGBA")
+    logo_image = logo_raw_image.convert("RGBA")  # type: ignore
     logo_image.thumbnail(image_size, Image.LANCZOS)
 
     gif_width, gif_height = gif.size
@@ -5134,7 +5134,7 @@ def add_progress_bar_to_gif(
         # Draw the text on the frame.
         frame = frame.convert("RGB")
         draw = ImageDraw.Draw(frame)
-        draw.rectangle(progress_bar_shapes[index], fill=progress_bar_color)
+        draw.rectangle(progress_bar_shapes[index], fill=progress_bar_color)  # type: ignore
         del draw
 
         b = io.BytesIO()
@@ -7353,13 +7353,13 @@ def draw_square_marker(draw, x, y, size, color):
     half_size = size // 2
     # Outer square (outline).
     draw.rectangle(
-        [x - half_size, y - half_size, x + half_size, y + half_size],
+        (x - half_size, y - half_size, x + half_size, y + half_size),  # type: ignore
         outline="white",
         width=3,
     )
     # Inner square (fill).
     draw.rectangle(
-        [x - half_size + 2, y - half_size + 2, x + half_size - 2, y + half_size - 2],
+        (x - half_size + 2, y - half_size + 2, x + half_size - 2, y + half_size - 2),  # type: ignore
         fill=color,
         outline=color,
     )
